@@ -2,6 +2,7 @@
 const json=(statusCode,body)=>({statusCode,headers:{"Content-Type":"application/json","Cache-Control":"no-store"},body:JSON.stringify(body)});
 export async function handler(event){
   if(event.httpMethod!=="POST")return json(405,{error:"Method not allowed"});
+  if((process.env.AI_MODE||"mock")!=="openai")return json(403,{error:"Запись отключена: активен бесплатный тестовый режим"});
   try{
     const token=event.headers.authorization?.replace(/^Bearer\s+/i,""),url=process.env.SUPABASE_URL,key=process.env.SUPABASE_PUBLISHABLE_KEY;
     if(!token||!url||!key)return json(401,{error:"Требуется авторизация"});
