@@ -45,6 +45,19 @@ li{display:flex;align-items:baseline;height:33px;font-size:22px;font-weight:700;
 .ph{width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:10px;align-self:center;flex:none}
 #video{height:1080px;flex:none;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25)}
 #video video{width:100%;height:100%;object-fit:cover}#video img{width:420px;height:420px;border-radius:50%;box-shadow:0 0 0 6px #c98a5b,0 20px 60px rgba(0,0,0,.7)}
+
+/* Optional light restaurant theme. The existing dark FARMAJO theme remains the default. */
+#stage.theme-light{background:linear-gradient(135deg,#fffdf8 0%,#f1e7d8 100%);color:#34251c}
+#stage.theme-light::before{opacity:.045}
+#stage.theme-light .cu{background:linear-gradient(180deg,#b8794e 0%,#8d5030 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+#stage.theme-light header .s{color:#594437}
+#stage.theme-light .col{border-left-color:rgba(153,99,63,.28)}
+#stage.theme-light li{color:#38291f;text-shadow:none}
+#stage.theme-light .v{color:#987052}
+#stage.theme-light .ban{color:#fffaf3;background:linear-gradient(90deg,#a96d46,#805034)}
+#stage.theme-light #video{background:#eee1d1}
+#stage.theme-light header img{box-shadow:0 0 0 3px #b8794e,0 6px 22px rgba(80,48,28,.16)}
+#stage.theme-light #video img{box-shadow:0 0 0 6px #b8794e,0 20px 60px rgba(80,48,28,.18)}
 </style></head><body><div id="stage"><div id="menu"></div><div id="video"></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script><script src="config.js"></script><script>
 const sb=supabase.createClient(CFG.url,CFG.key),ID=new URLSearchParams(location.search).get('id')||'screen1';let vkey='',busy=false,again=false;
@@ -52,10 +65,11 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;',
 async function load(){
  const r=await Promise.all([sb.from('screens').select('*').eq('id',ID).single(),sb.from('categories').select('*').order('sort'),sb.from('items').select('*').eq('active',true).order('sort'),sb.from('screen_categories').select('*').eq('screen_id',ID),sb.from('videos').select('*').eq('screen_id',ID).eq('active',true).order('sort'),sb.from('settings').select('*')]);
  for(const x of r)if(x.error)throw x.error;
- const vis={};let season='',screen3Logo='',screen3LogoEnabled=true;r[3].data.forEach(x=>vis[x.category_id]=x.visible);r[5].data.forEach(x=>{if(x.key==='season')season=x.value;if(x.key==='screen3_logo_url')screen3Logo=x.value;if(x.key==='screen3_logo_enabled')screen3LogoEnabled=x.value!=='false'});
+ const vis={};let season='',screen3Logo='',screen3LogoEnabled=true;r[3].data.forEach(x=>vis[x.category_id]=x.visible);r[5].data.forEach(x=>{if(x.key==='season')season=x.value;if(x.key==='screen3_logo_url')screen3Logo=x.value;if(x.key==='screen3_logo_enabled')screen3LogoEnabled=x.value!=='false';if(x.key==='menu_theme')window.__menuTheme=x.value||'dark'});
  render(r[0].data,r[1].data.filter(c=>vis[c.id]&&(!c.season||c.season===season)),r[2].data,r[4].data.filter(v=>!v.season||v.season===season),screen3Logo,screen3LogoEnabled);
 }
 function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled){
+ const selectedTheme=(window.__menuTheme||'dark');document.getElementById('stage').classList.toggle('theme-light',selectedTheme==='light');
  const vid=!!scr.video_enabled,wide=!vid||scr.menu_width>=60,mw=wide?1920:Math.round(1920*scr.menu_width/100);
  const body=cats.map(c=>{const li=items.filter(i=>i.category_id===c.id).map(i=>`<li>${i.photo_url?`<img class="ph" src="${esc(i.photo_url)}" alt="">`:''}<span class="n">${esc(i.name)}</span>${i.weight_g?`<span class="v">${i.weight_g} г</span>`:i.volume_ml?`<span class="v">${i.volume_ml} мл</span>`:''}<span class="d"></span><span class="p cu">${+i.price}</span></li>`).join('');return li?`<section><h2 class="cu">${esc(c.name)}</h2><ul>${li}</ul></section>`:''}).join('');
  const title=scr.name;
