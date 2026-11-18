@@ -1,0 +1,65 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>FARMAJO — Экран</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Inter:wght@600;700&display=swap">
+<style>
+:root{color-scheme:dark;--cream:#f6ead9;--muted:#b89a80;--cu:linear-gradient(180deg,#f3cfa6 0%,#d19463 55%,#a8693f 100%)}
+html,body{margin:0;height:100%;background:#0d0a08;overflow:hidden}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;background:linear-gradient(115deg,rgba(255,255,255,.07) 0%,rgba(255,255,255,0) 38%),radial-gradient(ellipse at 50% 110%,rgba(150,90,50,.35),transparent 60%),#17110d;color:var(--cream);font-family:Inter,"Segoe UI",Arial,sans-serif}
+#stage::before{content:"";position:absolute;inset:0;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='600'><filter id='w'><feTurbulence type='fractalNoise' baseFrequency='0.004 0.35' numOctaves='3' seed='7'/><feColorMatrix values='0 0 0 0 0.55  0 0 0 0 0.36  0 0 0 0 0.22  0 0 0 0.9 -0.25'/></filter><rect width='100%' height='100%' filter='url(%23w)'/></svg>");background-size:900px 600px;opacity:.28}
+#stage>*{position:relative}
+.cu{text-shadow:none!important;background:var(--cu);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+header{height:132px;display:flex;align-items:center;padding:0 64px}
+header img{width:104px;height:104px;border-radius:50%;box-shadow:0 0 0 3px #c98a5b,0 6px 22px rgba(0,0,0,.6)}
+header .t{margin-left:30px;font-family:Oswald,"Arial Narrow",sans-serif;font-weight:600;font-size:88px;letter-spacing:.02em;line-height:1;text-shadow:0 3px 10px rgba(0,0,0,.5)}
+header .s{margin-left:20px;font-family:Oswald,"Arial Narrow",sans-serif;font-weight:500;font-size:50px;color:var(--cream);padding-top:20px}
+main{display:grid;grid-template-columns:repeat(4,1fr);gap:0;padding:18px 64px 0}
+.col{padding:0 28px;border-left:1px solid rgba(201,138,91,.45)}
+.col:first-child{border-left:0;padding-left:0}.col:last-child{padding-right:0}
+section+section{margin-top:8px}
+h2{margin:6px 0 4px;font-family:Oswald,"Arial Narrow",sans-serif;font-weight:600;font-size:46px;line-height:1.15}
+ul{list-style:none;margin:0;padding:0}
+li{display:flex;align-items:baseline;height:33px;font-size:22px;font-weight:700;text-shadow:0 2px 4px rgba(0,0,0,.55)}
+.n{white-space:nowrap}
+.v{margin-left:10px;color:var(--muted);font-size:16px;font-weight:600;white-space:nowrap}
+.d{flex:1}
+.p{min-width:34px;text-align:right}
+.ban{position:absolute;left:64px;right:64px;bottom:22px;height:46px;display:flex;align-items:center;padding:0 24px;font-weight:700;font-size:22px;color:#1a120c;background:linear-gradient(90deg,#d9a275,#b9774a)}
+
+#stage{display:flex}
+#menu{height:1080px;box-sizing:border-box;overflow:hidden;flex:none}
+#menu main{display:block;column-count:4;column-gap:56px;column-rule:1px solid rgba(201,138,91,.45);padding:18px 64px 0}
+#menu section{break-inside:avoid;margin-bottom:8px}#menu .d{min-width:12px}#menu h2{break-after:avoid}#menu li{break-inside:avoid}
+#menu.narrow{padding:28px 44px 0;border-right:1px solid rgba(201,138,91,.45)}
+#menu.narrow main{column-count:1;padding:0}
+#menu.narrow li{height:36px;font-size:24px}#menu.narrow h2{font-size:48px}
+.mt{font-family:Oswald,"Arial Narrow",sans-serif;font-weight:600;font-size:60px;line-height:1.1;margin-bottom:10px}
+.ph{width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:10px;align-self:center;flex:none}
+#video{height:1080px;flex:none;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25)}
+#video video{width:100%;height:100%;object-fit:cover}#video img{width:420px;height:420px;border-radius:50%;box-shadow:0 0 0 6px #c98a5b,0 20px 60px rgba(0,0,0,.7)}
+</style></head><body><div id="stage"><div id="menu"></div><div id="video"></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script><script src="config.js"></script><script>
+const sb=supabase.createClient(CFG.url,CFG.key),ID=new URLSearchParams(location.search).get('id')||'screen1';let vkey='',busy=false,again=false;
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function load(){
+ const r=await Promise.all([sb.from('screens').select('*').eq('id',ID).single(),sb.from('categories').select('*').order('sort'),sb.from('items').select('*').eq('active',true).order('sort'),sb.from('screen_categories').select('*').eq('screen_id',ID),sb.from('videos').select('*').eq('screen_id',ID).eq('active',true).order('sort'),sb.from('settings').select('*')]);
+ for(const x of r)if(x.error)throw x.error;
+ const vis={};let season='';r[3].data.forEach(x=>vis[x.category_id]=x.visible);r[5].data.forEach(x=>{if(x.key==='season')season=x.value});
+ render(r[0].data,r[1].data.filter(c=>vis[c.id]&&(!c.season||c.season===season)),r[2].data,r[4].data.filter(v=>!v.season||v.season===season));
+}
+function render(scr,cats,items,vids){
+ const vid=!!scr.video_enabled,wide=!vid||scr.menu_width>=60,mw=wide?1920:Math.round(1920*scr.menu_width/100);
+ const body=cats.map(c=>{const li=items.filter(i=>i.category_id===c.id).map(i=>`<li>${i.photo_url?`<img class="ph" src="${esc(i.photo_url)}" alt="">`:''}<span class="n">${esc(i.name)}</span>${i.volume_ml?`<span class="v">${i.volume_ml} мл</span>`:''}<span class="d"></span><span class="p cu">${+i.price}</span></li>`).join('');return li?`<section><h2 class="cu">${esc(c.name)}</h2><ul>${li}</ul></section>`:''}).join('');
+ const title=cats.length&&cats.every(c=>c.season)?'Сезонное меню':'Меню';
+ const head=wide?'<header><img src="logo.png" alt="FARMAJO"><div class="t cu">FARMAJO</div><div class="s">Меню</div></header>':`<div class="mt cu">${title}</div>`;
+ const m=document.getElementById('menu');m.className=wide?'':'narrow';m.style.width=mw+'px';m.innerHTML=head+'<main>'+body+'</main>';
+ const v=document.getElementById('video');v.style.display=vid&&!wide?'flex':'none';v.style.width=(1920-mw)+'px';
+ const key=JSON.stringify([vid&&!wide,vids.map(x=>x.url)]);if(key===vkey)return;vkey=key;
+ if(!(vid&&!wide))return;
+ if(!vids.length){v.innerHTML='<img src="logo.png" alt="">';return}
+ v.innerHTML='<video muted autoplay playsinline></video>';const el=v.firstChild;el.muted=true;let n=0;el.src=vids[0].url;el.loop=vids.length===1;
+ el.onended=()=>{n=(n+1)%vids.length;el.src=vids[n].url;el.play()};el.play().catch(()=>{});
+}
+async function refresh(){if(busy){again=true;return}busy=true;try{await load()}catch(e){console.error(e);setTimeout(refresh,10000)}busy=false;if(again){again=false;refresh()}}
+let t;sb.channel('live').on('postgres_changes',{event:'*',schema:'public'},()=>{clearTimeout(t);t=setTimeout(refresh,400)}).subscribe();
+setInterval(refresh,60000);refresh();
+function f(){const s=Math.min(innerWidth/1920,innerHeight/1080),e=document.getElementById('stage');e.style.transform='scale('+s+')';e.style.marginLeft=(-960*s)+'px';e.style.marginTop=(-540*s)+'px'}addEventListener('resize',f);f();
+</script></body></html>

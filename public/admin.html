@@ -1,0 +1,70 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>FARMAJO — Админ</title>
+<style>
+:root{color-scheme:dark}body{margin:0;background:#141210;color:#f1e8dc;font:16px -apple-system,"Segoe UI",Arial,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+#login[hidden]{display:none}#login{max-width:340px;margin:12vh auto;display:grid;gap:12px;padding:0 16px}h1{color:#d19463;margin:0}
+input,select,button{font:inherit;font-size:16px;color:inherit;background:#26211d;border:1px solid #4a3f36;border-radius:10px;padding:10px;min-width:0}
+button{cursor:pointer;background:#3a2e25}#go{background:#c98a5b;color:#1a120c;font-weight:700}
+nav{position:sticky;top:0;display:flex;gap:6px;padding:10px;background:#141210;z-index:2;overflow-x:auto}nav .on{background:#c98a5b;color:#1a120c;font-weight:700}
+#app{padding:0 10px 80px;max-width:900px;margin:auto}.card{background:#1d1814;border:1px solid #3a2e25;border-radius:14px;padding:10px;margin:10px 0}
+.row,.item{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:6px 0}.grow{flex:1;min-width:140px}.b{font-weight:700}.num{width:76px}
+.item.off{opacity:.5}.ph{width:46px;height:46px;border:1px dashed #6b5a4b;border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;flex:none;color:#d19463}.ph img{width:100%;height:100%;object-fit:cover}input[type=file]{display:none}
+.x{color:#ff8a7a}.add{width:100%;box-sizing:border-box;text-align:center;color:#d19463;display:block;padding:10px;border:1px dashed #6b5a4b;border-radius:10px;background:none;cursor:pointer}
+.row .add{width:auto;flex:1}video{width:120px;border-radius:8px}.chk{display:block;padding:8px 0}.mut{color:#8d8a84}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#2e5b3a;padding:10px 18px;border-radius:20px;opacity:0;transition:.2s;pointer-events:none}#toast.bad{background:#7a2e2e}#toast.show{opacity:1}
+</style></head><body>
+<div id="login" hidden><h1>FARMAJO</h1><input id="em" type="email" placeholder="E-mail" autocomplete="username"><input id="pw" type="password" placeholder="Пароль" autocomplete="current-password"><button id="go">Войти</button><div id="le" class="mut"></div></div>
+<div id="main" hidden><nav><button data-tab="menu">Меню</button><button data-tab="screens">Экраны</button><button data-tab="videos">Видео</button><button data-act="out">Выйти</button></nav><div id="app"></div></div><div id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script><script src="config.js"></script>
+<script>
+const sb=supabase.createClient(CFG.url,CFG.key),$=s=>document.querySelector(s),app=$('#app');
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const A=(t,id,f)=>`data-t="${t}" data-id="${id}" data-f="${f}"`,SN={'':'всегда',winter:'зима',summer:'лето'};
+const SO=v=>['','winter','summer'].map(s=>`<option value="${s}"${(v||'')===s?' selected':''}>${SN[s]}</option>`).join('');
+const KEY={categories:'cats',items:'items',screens:'screens',videos:'vids'};
+let D={cats:[],items:[],screens:[],sct:[],vids:[],season:'winter'},tab='menu',vsc='screen1',isOn=false;
+function toast(m,bad){const t=$('#toast');t.textContent=m;t.className=bad?'bad show':'show';clearTimeout(toast.t);toast.t=setTimeout(()=>t.className='',2200)}
+async function run(p,quiet){const r=await p;if(r.error){toast('Ошибка: '+r.error.message,1);throw r.error}if(!quiet)toast('Сохранено');return r}
+async function load(){const q=t=>sb.from(t).select('*');const r=await Promise.all([q('categories').order('sort'),q('items').order('sort'),q('screens').order('id'),q('screen_categories'),q('videos').order('sort'),q('settings')]);
+ for(const x of r)if(x.error){toast('Ошибка загрузки: '+x.error.message,1);return}
+ D={cats:r[0].data,items:r[1].data,screens:r[2].data,sct:r[3].data,vids:r[4].data,season:(r[5].data.find(x=>x.key==='season')||{}).value||'winter'};draw()}
+function draw(){document.querySelectorAll('nav [data-tab]').forEach(b=>b.className=b.dataset.tab===tab?'on':'');app.innerHTML=tab==='menu'?drawMenu():tab==='screens'?drawScreens():drawVideos()}
+function mv(t,id){return `<button data-act="up" data-t="${t}" data-id="${id}">↑</button><button data-act="down" data-t="${t}" data-id="${id}">↓</button>`}
+function drawMenu(){return D.cats.map(c=>`<div class="card"><div class="row"><input class="grow b" value="${esc(c.name)}" ${A('categories',c.id,'name')}><select ${A('categories',c.id,'season')} data-nul="1">${SO(c.season)}</select>${mv('categories',c.id)}<button class="x" data-act="delcat" data-id="${c.id}">✕</button></div>`
+ +D.items.filter(i=>i.category_id===c.id).map(i=>`<div class="item${i.active?'':' off'}"><label class="ph">${i.photo_url?`<img src="${esc(i.photo_url)}" alt="">`:'+'}<input type="file" accept="image/*" data-file="photo" data-id="${i.id}"></label><input class="grow" value="${esc(i.name)}" ${A('items',i.id,'name')}><input class="num" type="number" inputmode="numeric" placeholder="мл" value="${i.volume_ml==null?'':i.volume_ml}" ${A('items',i.id,'volume_ml')}><input class="num" type="number" inputmode="decimal" placeholder="цена" value="${i.price}" ${A('items',i.id,'price')}><input type="checkbox" ${i.active?'checked':''} title="Показывать" ${A('items',i.id,'active')}>${mv('items',i.id)}<button class="x" data-act="delitem" data-id="${i.id}">✕</button></div>`).join('')
+ +`<button class="add" data-act="additem" data-id="${c.id}">+ Позиция</button></div>`).join('')+'<button class="add" data-act="addcat">+ Категория</button>'}
+function drawScreens(){return `<div class="card row">Сезон сейчас: <select data-season="1">${['winter','summer'].map(s=>`<option value="${s}"${D.season===s?' selected':''}>${s==='winter'?'Зима':'Лето'}</option>`).join('')}</select></div>`
+ +D.screens.map(s=>`<div class="card"><div class="row"><b class="grow">${esc(s.name)}</b><label>Ширина меню, % <input class="num" type="number" value="${s.menu_width}" ${A('screens',s.id,'menu_width')}></label><label><input type="checkbox" ${s.video_enabled?'checked':''} ${A('screens',s.id,'video_enabled')}> Видео</label></div>`
+ +D.cats.map(c=>{const v=(D.sct.find(x=>x.screen_id===s.id&&x.category_id===c.id)||{}).visible;return `<label class="chk"><input type="checkbox" ${v?'checked':''} data-sc="${s.id}|${c.id}"> ${esc(c.name)}${c.season?' ('+SN[c.season]+')':''}</label>`}).join('')+'</div>').join('')}
+function drawVideos(){const vs=D.vids.filter(v=>v.screen_id===vsc);
+ const list=vs.length?vs.map(v=>`<div class="card item"><video src="${esc(v.url)}" muted preload="metadata"></video><select ${A('videos',v.id,'season')} data-nul="1">${SO(v.season)}</select><label><input type="checkbox" ${v.active?'checked':''} ${A('videos',v.id,'active')}> показывать</label>${mv('videos',v.id)}<button class="x" data-act="delvid" data-id="${v.id}">✕</button></div>`).join(''):'<p class="mut">Видео пока нет</p>';
+ return `<div class="card row"><select data-vsc="1">${D.screens.map(s=>`<option value="${s.id}"${s.id===vsc?' selected':''}>${esc(s.name)}</option>`).join('')}</select><label class="add">+ Загрузить видео (до 50 МБ)<input type="file" accept="video/*" data-file="video" data-id="${vsc}"></label></div>`+list}
+async function shrink(f){try{const b=await createImageBitmap(f),k=Math.min(1,900/Math.max(b.width,b.height)),c=document.createElement('canvas');c.width=Math.round(b.width*k);c.height=Math.round(b.height*k);c.getContext('2d').drawImage(b,0,0,c.width,c.height);return await new Promise(r=>c.toBlob(r,'image/jpeg',.85))}catch(e){return f}}
+async function up(path,body,type){await run(sb.storage.from('media').upload(path,body,{contentType:type,upsert:true}),1);return sb.storage.from('media').getPublicUrl(path).data.publicUrl}
+app.addEventListener('change',async e=>{const el=e.target,d=el.dataset;
+ try{
+ if(d.file){const f=el.files[0];if(!f)return;toast('Загрузка…');
+  if(d.file==='photo'){const b=await shrink(f),u=await up('items/'+d.id+'-'+Date.now()+'.jpg',b,b.type||'image/jpeg');await run(sb.from('items').update({photo_url:u}).eq('id',d.id))}
+  else{if(f.size>50*1048576){toast('Файл больше 50 МБ — сожмите видео',1);return}const ex=(f.name.split('.').pop()||'mp4').toLowerCase(),u=await up('videos/'+d.id+'-'+Date.now()+'.'+ex,f,f.type||'video/mp4');await run(sb.from('videos').insert({screen_id:d.id,url:u,sort:D.vids.filter(v=>v.screen_id===d.id).length}))}
+  await load();return}
+ if(d.sc){const [s,c]=d.sc.split('|');await run(sb.from('screen_categories').upsert({screen_id:s,category_id:c,visible:el.checked},{onConflict:'screen_id,category_id'}));await load();return}
+ if(d.season){await run(sb.from('settings').upsert({key:'season',value:el.value}));await load();return}
+ if(d.vsc){vsc=el.value;draw();return}
+ if(d.t){let v=el.type==='checkbox'?el.checked:el.value;if(el.type==='number')v=v===''?null:Number(v);else if(d.nul&&v==='')v=null;
+  await run(sb.from(d.t).update({[d.f]:v}).eq('id',d.id));const o=D[KEY[d.t]].find(x=>String(x.id)===d.id);if(o)o[d.f]=v;if(el.type==='checkbox'||el.tagName==='SELECT')draw()}
+ }catch(x){console.error(x)}});
+app.addEventListener('click',async e=>{const b=e.target.closest('[data-act]');if(b)act(b.dataset)});
+$('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.tab){tab=b.dataset.tab;draw()}else if(b.dataset.act)act(b.dataset)});
+async function act(d){const a=d.act;
+ try{
+ if(a==='out'){await sb.auth.signOut();return}
+ if(a==='up'||a==='down'){const arr=d.t==='categories'?D.cats:d.t==='videos'?D.vids.filter(v=>v.screen_id===vsc):D.items.filter(i=>i.category_id===D.items.find(x=>x.id===d.id).category_id);
+  const i=arr.findIndex(x=>x.id===d.id),j=a==='up'?i-1:i+1;if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];
+  await Promise.all(arr.map((x,n)=>run(sb.from(d.t).update({sort:n}).eq('id',x.id),1)));toast('Сохранено')}
+ else if(a==='addcat'){const n=prompt('Название категории');if(!n)return;const r=await run(sb.from('categories').insert({name:n,sort:D.cats.length}).select().single());await run(sb.from('screen_categories').insert(D.screens.map(s=>({screen_id:s.id,category_id:r.data.id,visible:false}))),1)}
+ else if(a==='additem'){await run(sb.from('items').insert({category_id:d.id,name:'Новая позиция',price:0,sort:D.items.filter(i=>i.category_id===d.id).length}))}
+ else if(a==='delcat'||a==='delitem'||a==='delvid'){if(!confirm('Удалить? Это нельзя отменить.'))return;await run(sb.from({delcat:'categories',delitem:'items',delvid:'videos'}[a]).delete().eq('id',d.id))}
+ await load()}catch(x){console.error(x)}}
+function show(on){$('#login').hidden=on;$('#main').hidden=!on;if(on&&!isOn)load();isOn=on}
+$('#go').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('#em').value.trim(),password:$('#pw').value});$('#le').textContent=error?'Неверный e-mail или пароль':''};
+sb.auth.getSession().then(({data})=>{show(!!data.session);sb.auth.onAuthStateChange((_,s)=>show(!!s))});
+</script></body></html>
