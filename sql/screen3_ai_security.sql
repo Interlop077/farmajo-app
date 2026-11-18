@@ -1,3 +1,5 @@
+begin;
+
 -- FARMAJO AI draft storage + atomic apply.
 -- Run manually only after reviewing schema assumptions. This file is NOT executed by this change.
 create table if not exists public.ai_menu_drafts (
@@ -6,7 +8,7 @@ create table if not exists public.ai_menu_drafts (
   summary text not null,
   operations jsonb not null,
   operations_hash text not null,
-  mode text not null check (mode = 'mock'),
+  mode text not null check (mode in ('mock','openai')),
   created_at timestamptz not null default now(),
   expires_at timestamptz not null,
   consumed_at timestamptz
@@ -32,7 +34,7 @@ declare
 begin
   if coalesce(auth.role(),'') <> 'service_role' then raise exception 'server function only' using errcode='42501'; end if;
   if v_user is null then raise exception 'draft owner required' using errcode='28000'; end if;
-  if p_mode <> 'mock' then raise exception 'OpenAI mode is disabled'; end if;
+  if p_mode not in ('mock','openai') then raise exception 'invalid draft mode'; end if;
   if jsonb_typeof(p_operations) <> 'array' or jsonb_array_length(p_operations) > 50 then
     raise exception 'invalid operations';
   end if;
@@ -132,3 +134,6 @@ revoke all on function public.create_ai_menu_draft(text,jsonb,text,integer,uuid)
 revoke all on function public.apply_ai_menu_draft(uuid,text) from public, anon;
 grant execute on function public.create_ai_menu_draft(text,jsonb,text,integer,uuid) to service_role;
 grant execute on function public.apply_ai_menu_draft(uuid,text) to authenticated;
+
+
+commit;

@@ -72,6 +72,6 @@ test("mock mode is read-only even for direct HTTP requests",async()=>{
  process.env.AI_MODE="mock";let calls=0;globalThis.fetch=async()=>{calls++;throw Error("must not call");};
  const out=await applyHandler(event({operations:[{type:"update_item",id:"legacy"}]}));
  assert.equal(out.statusCode,403);assert.equal(calls,0);
- assert.ok(sql.includes("p_mode <> 'mock'")===false); // mock drafts only; apply SQL separately rejects mode <> openai
+ assert.ok(sql.includes("p_mode not in ('mock','openai')")); // draft creation is server-role only
  assert.ok(sql.includes("if d.mode <> 'openai' then raise exception 'mock drafts are never writable'"));
 });
