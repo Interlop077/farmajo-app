@@ -94,22 +94,21 @@ li{display:flex;align-items:baseline;height:33px;font-size:22px;font-weight:700;
 #stage.theme-luxury #menu.screen3.luxury-paged{position:relative}
 #stage.theme-luxury #menu.screen3.luxury-paged .menu-page{position:absolute;left:0;right:0;top:150px;bottom:26px;opacity:0;transform:translateX(34px);transition:opacity .7s ease,transform .7s ease;pointer-events:none}
 #stage.theme-luxury #menu.screen3.luxury-paged .menu-page.active{opacity:1;transform:translateX(0);pointer-events:auto}
-#stage.theme-luxury #menu.screen3.luxury-paged .menu-page main{height:100%;box-sizing:border-box;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:0;row-gap:10px;padding:8px 64px 0;align-content:start;overflow:hidden}
-#stage.theme-luxury #menu.screen3.luxury-paged .menu-page section{min-width:0;padding:0 18px;border-left:1px solid rgba(218,171,86,.35)}
-#stage.theme-luxury #menu.screen3.luxury-paged .menu-page section:nth-child(4n+1){border-left:0;padding-left:0}
-#stage.theme-luxury #menu.screen3.luxury-paged .menu-page section h2{font-size:38px;line-height:1.05;margin:2px 0 8px}
-#stage.theme-luxury #menu.screen3.luxury-paged .menu-page section ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:0}
+#stage.theme-luxury #menu.screen3.luxury-paged .menu-page main{height:100%;box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1fr);padding:8px 64px 0;align-content:start;overflow:hidden}
+#stage.theme-luxury #menu.screen3.luxury-paged .menu-page section{min-width:0;padding:0;border:0}
+#stage.theme-luxury #menu.screen3.luxury-paged .menu-page section h2{font-size:48px;line-height:1.05;margin:2px 0 24px;text-align:center}
+#stage.theme-luxury #menu.screen3.luxury-paged .menu-page section ul{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:0}
 #stage.theme-luxury #menu.screen3.luxury-paged .dish-card{min-width:0}
-#stage.theme-luxury #menu.screen3.luxury-paged .dish-photo{height:104px}
+#stage.theme-luxury #menu.screen3.luxury-paged .dish-photo{height:132px}
 #stage.theme-luxury #menu.screen3.luxury-paged .dish-info{gap:5px;padding:7px 8px 8px}
 #stage.theme-luxury #menu.screen3.luxury-paged .dish-name{font-size:18px;line-height:1.08}
 #stage.theme-luxury #menu.screen3.luxury-paged .dish-meta .v{font-size:14px}
 #stage.theme-luxury #menu.screen3.luxury-paged .dish-meta .p{font-size:20px}
 #stage.theme-luxury #menu.screen3.narrow.luxury-paged .menu-page{top:92px}
-#stage.theme-luxury #menu.screen3.narrow.luxury-paged .menu-page main{grid-template-columns:repeat(2,minmax(0,1fr));padding:8px 28px 0}
-#stage.theme-luxury #menu.screen3.narrow.luxury-paged .menu-page section:nth-child(2n+1){border-left:0;padding-left:0}
-#stage.theme-luxury #menu.screen3.narrow.luxury-paged .menu-page section h2{font-size:34px}
-#stage.theme-luxury #menu.screen3.narrow.luxury-paged .dish-photo{height:116px}
+#stage.theme-luxury #menu.screen3.narrow.luxury-paged .menu-page main{grid-template-columns:minmax(0,1fr);padding:8px 28px 0}
+#stage.theme-luxury #menu.screen3.narrow.luxury-paged .menu-page section h2{font-size:38px;margin-bottom:16px}
+#stage.theme-luxury #menu.screen3.narrow.luxury-paged .menu-page section ul{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#stage.theme-luxury #menu.screen3.narrow.luxury-paged .dish-photo{height:132px}
 @media(prefers-reduced-motion:reduce){#stage.theme-luxury #menu.screen3.luxury-paged .menu-page{transition:none}}
 
 </style></head><body><div id="stage"><canvas id="embers" aria-hidden="true"></canvas><div id="menu"></div><div id="video"></div></div>
@@ -131,10 +130,9 @@ function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled){
  const normalDish=i=>`<li>${i.photo_url?`<img class="ph" src="${esc(i.photo_url)}" alt="">`:''}<span class="n">${esc(i.name)}</span>${i.weight_g?`<span class="v">${i.weight_g} г</span>`:i.volume_ml?`<span class="v">${i.volume_ml} мл</span>`:''}<span class="d"></span><span class="p cu">${+i.price}</span></li>`;
  let body='';
  if(luxury3){
-  const chunks=[];
-  cats.forEach(c=>{const list=items.filter(i=>i.category_id===c.id);for(let j=0;j<list.length;j+=8)chunks.push({category:c,items:list.slice(j,j+8)})});
-  const pages=[];for(let j=0;j<chunks.length;j+=4)pages.push(chunks.slice(j,j+4));
-  body=pages.map((page,index)=>`<div class="menu-page${index===0?' active':''}" data-page="${index}"><main>${page.map(part=>`<section><h2 class="cu">${esc(part.category.name)}</h2><ul>${part.items.map(dishCard).join('')}</ul></section>`).join('')}</main></div>`).join('');
+  const pages=[];
+  cats.forEach(c=>{const list=items.filter(i=>i.category_id===c.id);for(let j=0;j<list.length;j+=8)pages.push({category:c,items:list.slice(j,j+8),part:j/8+1,total:Math.ceil(list.length/8)})});
+  body=pages.map((page,index)=>`<div class="menu-page${index===0?' active':''}" data-page="${index}"><main><section><h2 class="cu">${esc(page.category.name)}</h2><ul>${page.items.map(dishCard).join('')}</ul></section></main></div>`).join('');
  }else{
   body=cats.map(c=>{const li=items.filter(i=>i.category_id===c.id).map(normalDish).join('');return li?`<section><h2 class="cu">${esc(c.name)}</h2><ul>${li}</ul></section>`:''}).join('');
  }
