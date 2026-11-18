@@ -6,7 +6,7 @@ create table if not exists public.ai_menu_drafts (
   summary text not null,
   operations jsonb not null,
   operations_hash text not null,
-  mode text not null check (mode in ('mock','openai')),
+  mode text not null check (mode = 'mock'),
   created_at timestamptz not null default now(),
   expires_at timestamptz not null,
   consumed_at timestamptz
@@ -19,7 +19,8 @@ create or replace function public.create_ai_menu_draft(
   p_summary text,
   p_operations jsonb,
   p_mode text default 'mock',
-  p_ttl_seconds integer default 900
+  p_ttl_seconds integer default 900,
+  p_user_id uuid default null
 ) returns jsonb
 language plpgsql security definer
 set search_path = public, pg_temp
@@ -27,10 +28,11 @@ as $$
 declare
   v_id uuid;
   v_hash text;
-  v_user uuid := auth.uid();
+  v_user uuid := p_user_id;
 begin
-  if v_user is null then raise exception 'authentication required' using errcode='28000'; end if;
-  if p_mode not in ('mock','openai') then raise exception 'invalid draft mode'; end if;
+  if coalesce(auth.role(),'') <> 'service_role' then raise exception 'server function only' using errcode='42501'; end if;
+  if v_user is null then raise exception 'draft owner required' using errcode='28000'; end if;
+  if p_mode <> 'mock' then raise exception 'OpenAI mode is disabled'; end if;
   if jsonb_typeof(p_operations) <> 'array' or jsonb_array_length(p_operations) > 50 then
     raise exception 'invalid operations';
   end if;
@@ -126,7 +128,7 @@ begin
 end;
 $$;
 
-revoke all on function public.create_ai_menu_draft(text,jsonb,text,integer) from public, anon;
+revoke all on function public.create_ai_menu_draft(text,jsonb,text,integer,uuid) from public, anon, authenticated;
 revoke all on function public.apply_ai_menu_draft(uuid,text) from public, anon;
-grant execute on function public.create_ai_menu_draft(text,jsonb,text,integer) to authenticated;
+grant execute on function public.create_ai_menu_draft(text,jsonb,text,integer,uuid) to service_role;
 grant execute on function public.apply_ai_menu_draft(uuid,text) to authenticated;
