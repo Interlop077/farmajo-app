@@ -107,6 +107,33 @@ li{display:flex;align-items:baseline;height:33px;font-size:22px;font-weight:700;
 #stage.screen3-stage #menu.screen3.luxury-paged .dish-meta .v{font-size:15px;color:#d8b979}
 #stage.screen3-stage #menu.screen3.luxury-paged .dish-placeholder{background:radial-gradient(ellipse at 50% 28%,#79512b 0%,#342317 48%,#100d09 100%);color:#f0c66f}
 #stage.screen3-stage #menu.screen3.luxury-paged .menu-page section h2{text-shadow:0 3px 18px rgba(225,164,66,.28);letter-spacing:.035em}
+/* Reference-inspired full-screen composition: FARMAJO mark at left, centered category title,
+   gold rules, and a visible bed of glowing charcoal along the lower edge. */
+#stage.screen3-stage::after{content:"";position:absolute;left:0;right:0;bottom:0;height:245px;z-index:0;pointer-events:none;background:
+ radial-gradient(ellipse at 7% 100%,rgba(255,91,22,.58) 0,rgba(196,55,12,.24) 18%,transparent 42%),
+ radial-gradient(ellipse at 29% 100%,rgba(255,125,35,.46) 0,rgba(170,54,12,.18) 19%,transparent 43%),
+ radial-gradient(ellipse at 54% 100%,rgba(255,98,20,.48) 0,rgba(175,48,10,.18) 21%,transparent 45%),
+ radial-gradient(ellipse at 81% 100%,rgba(255,121,30,.5) 0,rgba(170,51,10,.18) 20%,transparent 44%),
+ linear-gradient(0deg,rgba(5,4,3,.95),rgba(9,7,5,.12) 70%,transparent)}
+#stage.screen3-stage #menu.screen3.luxury-paged header .t{display:none}
+#stage.screen3-stage #menu.screen3.luxury-paged header{height:150px;justify-content:flex-start;padding:0 64px}
+#stage.screen3-stage #menu.screen3.luxury-paged header img{position:relative;left:auto;width:104px;height:104px}
+#stage.screen3-stage #menu.screen3.luxury-paged .menu-page section h2{position:relative;padding-top:4px;margin:0 0 24px;font-size:54px;letter-spacing:.06em;text-transform:uppercase}
+#stage.screen3-stage #menu.screen3.luxury-paged .menu-page section h2::before,
+#stage.screen3-stage #menu.screen3.luxury-paged .menu-page section h2::after{content:"";position:absolute;top:50%;width:27%;height:2px;background:linear-gradient(90deg,transparent,#d7a94e 45%,#f4d78d)}
+#stage.screen3-stage #menu.screen3.luxury-paged .menu-page section h2::before{right:calc(50% + 250px);background:linear-gradient(90deg,transparent,#d7a94e)}
+#stage.screen3-stage #menu.screen3.luxury-paged .menu-page section h2::after{left:calc(50% + 250px);background:linear-gradient(90deg,#d7a94e,transparent)}
+#stage.screen3-stage #menu.screen3.luxury-paged .menu-page section ul{height:760px;gap:14px 18px}
+#stage.screen3-stage #menu.screen3.luxury-paged .dish-card{border:2px solid #bd8a36;border-radius:15px;background:linear-gradient(145deg,rgba(12,11,9,.98),rgba(24,18,11,.99));box-shadow:0 8px 22px rgba(0,0,0,.62),0 0 12px rgba(215,158,59,.13)}
+#stage.screen3-stage #menu.screen3.luxury-paged .dish-photo{width:55%;height:100%;min-height:0;object-fit:cover}
+#stage.screen3-stage #menu.screen3.luxury-paged .dish-info{justify-content:center;padding:12px 14px;gap:13px;background:linear-gradient(90deg,rgba(5,5,4,.98),rgba(17,13,8,.98))}
+#stage.screen3-stage #menu.screen3.luxury-paged .dish-name{font-family:Oswald,"Arial Narrow",sans-serif;font-size:26px;line-height:1.14;color:#f7e2b4}
+#stage.screen3-stage #menu.screen3.luxury-paged .dish-meta .v{font-size:18px;color:#b89a62}
+#stage.screen3-stage #menu.screen3.luxury-paged .dish-meta .p{font-family:Oswald,"Arial Narrow",sans-serif;font-size:28px;color:#f0c66f}
+#stage.screen3-stage #menu.screen3.luxury-paged .dish-placeholder{width:55%;height:100%;min-height:0;flex:none}
+#stage.screen3-stage #menu.screen3.luxury-paged .menu-page{z-index:2}
+#stage.screen3-stage #embers{z-index:1}
+#stage.screen3-stage #menu{z-index:2}
 /* Screen 3 luxury: denser responsive cards and automatic animated pages. */
 #stage.theme-luxury #menu.screen3.luxury-paged{position:relative}
 #stage.theme-luxury #menu.screen3.luxury-paged .menu-page{position:absolute;left:0;right:0;top:150px;bottom:26px;opacity:0;transform:translateX(34px);transition:opacity .7s ease,transform .7s ease;pointer-events:none}
