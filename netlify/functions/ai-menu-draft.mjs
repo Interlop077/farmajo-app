@@ -30,7 +30,9 @@ export async function handler(event){
     if(!prompt||prompt.length>2000)return json(400,{error:"Запрос должен содержать от 1 до 2000 символов"});
     // Safe default: no API calls, no writes, no demo data inserted.
     if((process.env.AI_MODE||"mock")!=="openai")return json(200,{mode:"mock",summary:"Тестовый режим активен. Платные запросы не выполнялись. Предварительный просмотр проверен; реальных изменений пока нет.",operations:[]});
-    const allowedUsers=(process.env.AI_ALLOWED_USER_IDS||"").split(",").map(x=>x.trim()).filter(Boolean);\n    if(!allowedUsers.includes(ctx.user.id))return json(403,{error:"AI-доступ не разрешён для этой учётной записи. Настройте AI_ALLOWED_USER_IDS в Netlify."});\n    const links=await dbGet(ctx,"screen_categories?select=screen_id,category_id");
+    const allowedUsers=(process.env.AI_ALLOWED_USER_IDS||"").split(",").map(x=>x.trim()).filter(Boolean);
+    if(!allowedUsers.includes(ctx.user.id))return json(403,{error:"AI-доступ не разрешён для этой учётной записи. Настройте AI_ALLOWED_USER_IDS в Netlify."});
+    const links=await dbGet(ctx,"screen_categories?select=screen_id,category_id");
     const screen3Ids=links.filter(x=>x.screen_id==="screen3").map(x=>String(x.category_id));
     const legacyIds=new Set(links.filter(x=>x.screen_id==="screen1"||x.screen_id==="screen2").map(x=>String(x.category_id)));
     const allowedIds=screen3Ids.filter(id=>!legacyIds.has(id));
