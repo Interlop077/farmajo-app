@@ -47,9 +47,9 @@ async function load(){
 }
 function render(scr,cats,items,vids){
  const vid=!!scr.video_enabled,wide=!vid||scr.menu_width>=60,mw=wide?1920:Math.round(1920*scr.menu_width/100);
- const body=cats.map(c=>{const li=items.filter(i=>i.category_id===c.id).map(i=>`<li>${i.photo_url?`<img class="ph" src="${esc(i.photo_url)}" alt="">`:''}<span class="n">${esc(i.name)}</span>${i.volume_ml?`<span class="v">${i.volume_ml} мл</span>`:''}<span class="d"></span><span class="p cu">${+i.price}</span></li>`).join('');return li?`<section><h2 class="cu">${esc(c.name)}</h2><ul>${li}</ul></section>`:''}).join('');
- const title=cats.length&&cats.every(c=>c.season)?'Сезонное меню':'Меню';
- const head=wide?'<header><img src="logo.png" alt="FARMAJO"><div class="t cu">FARMAJO</div><div class="s">Меню</div></header>':`<div class="mt cu">${title}</div>`;
+ const body=cats.map(c=>{const li=items.filter(i=>i.category_id===c.id).map(i=>`<li>${i.photo_url?`<img class="ph" src="${esc(i.photo_url)}" alt="">`:''}<span class="n">${esc(i.name)}</span>${i.weight_g?`<span class="v">${i.weight_g} г</span>`:i.volume_ml?`<span class="v">${i.volume_ml} мл</span>`:''}<span class="d"></span><span class="p cu">${+i.price}</span></li>`).join('');return li?`<section><h2 class="cu">${esc(c.name)}</h2><ul>${li}</ul></section>`:''}).join('');
+ const title=ID==='screen3'?'Шашлычная':(cats.length&&cats.every(c=>c.season)?'Сезонное меню':'Меню');
+ const head=wide?`<header><img src="logo.png" alt="FARMAJO"><div class="t cu">FARMAJO</div><div class="s">${ID==='screen3'?'Шашлычная':'Меню'}</div></header>`:`<div class="mt cu">${title}</div>`;
  const m=document.getElementById('menu');m.className=wide?'':'narrow';m.style.width=mw+'px';m.innerHTML=head+'<main>'+body+'</main>';fit();
  const v=document.getElementById('video');v.style.display=vid&&!wide?'flex':'none';v.style.width=(1920-mw)+'px';
  const key=JSON.stringify([vid&&!wide,vids.map(x=>x.url)]);if(key===vkey)return;vkey=key;
