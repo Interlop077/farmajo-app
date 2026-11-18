@@ -28,8 +28,14 @@ export async function handler(event){
     const ctx=await authUser(event),body=JSON.parse(event.body||"{}");
     const prompt=String(body.prompt||"").trim();
     if(!prompt||prompt.length>2000)return json(400,{error:"Запрос должен содержать от 1 до 2000 символов"});
-    // Safe default: no API calls, no writes, no demo data inserted.
-    if((process.env.AI_MODE||"mock")!=="openai")return json(200,{mode:"mock",summary:"Тестовый режим активен. Платные запросы не выполнялись. Предварительный просмотр проверен; реальных изменений пока нет.",operations:[]});
+    // Safe default: local demo draft only. It is never accepted by the apply endpoint.
+    if((process.env.AI_MODE||"mock")!=="openai"){
+      const links=await dbGet(ctx,"screen_categories?select=screen_id,category_id");
+      const s3=links.filter(x=>x.screen_id==="screen3").map(x=>String(x.category_id));
+      const legacy=new Set(links.filter(x=>x.screen_id==="screen1"||x.screen_id==="screen2").map(x=>String(x.category_id)));
+      const first=s3.find(id=>!legacy.has(id));
+      return json(200,{mode:"mock",summary:"Демо-предложение для проверки предварительного просмотра. Это не ответ OpenAI и не будет записано в Supabase.",operations:first?[{type:"create_item",id:null,category_id:first,name:"Демо-позиция (не сохраняется)",price:null,weight_g:null,active:true}]:[]});
+    }
     const allowedUsers=(process.env.AI_ALLOWED_USER_IDS||"").split(",").map(x=>x.trim()).filter(Boolean);
     if(!allowedUsers.includes(ctx.user.id))return json(403,{error:"AI-доступ не разрешён для этой учётной записи. Настройте AI_ALLOWED_USER_IDS в Netlify."});
     const links=await dbGet(ctx,"screen_categories?select=screen_id,category_id");
