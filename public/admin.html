@@ -68,7 +68,7 @@ async function act(d){const a=d.act;
  if(a==='out'){await sb.auth.signOut();return}
  if(a==='up'||a==='down'){const arr=d.t==='categories'?D.cats.filter(c=>menuScreen==='screen3'?D.sct.some(x=>x.screen_id==='screen3'&&x.category_id===c.id):!D.sct.some(x=>x.screen_id==='screen3'&&x.category_id===c.id)):d.t==='videos'?D.vids.filter(v=>v.screen_id===vsc):D.items.filter(i=>i.category_id===D.items.find(x=>x.id===d.id).category_id);
   const i=arr.findIndex(x=>x.id===d.id),j=a==='up'?i-1:i+1;if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];
-  await Promise.all(arr.map((x,n)=>run(sb.from(d.t).update({sort:n}).eq('id',x.id),1)));toast('Сохранено')}
+  await Promise.all(arr.map((x,n)=>run(sb.from(d.t).update({sort:n}).eq('id',x.id),1)));await load();toast('Сохранено')}
  else if(a==='addcat'){const n=prompt('Название категории для '+(D.screens.find(s=>s.id===menuScreen)||{}).name);if(!n)return;const r=await run(sb.from('categories').insert({name:n,sort:D.cats.length}).select().single());const links=menuScreen==='screen3'?[{screen_id:'screen3',category_id:r.data.id,visible:true}]:D.screens.filter(s=>s.id!=='screen3').map(s=>({screen_id:s.id,category_id:r.data.id,visible:false}));await run(sb.from('screen_categories').insert(links),1)}
  else if(a==='delphoto'){if(!confirm('Удалить фото этой позиции?'))return;const it=D.items.find(x=>x.id===d.id);await run(sb.from('items').update({photo_url:null}).eq('id',d.id));const m=it&&it.photo_url&&it.photo_url.split('/media/')[1];if(m){try{await sb.storage.from('media').remove([decodeURIComponent(m.split('?')[0])])}catch(e){}}}
  else if(a==='delscreen3logo'){if(!confirm('Удалить отдельный логотип экрана 3?'))return;await run(sb.from('settings').delete().eq('key','screen3_logo_url'))}
