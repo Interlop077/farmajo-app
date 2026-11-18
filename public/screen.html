@@ -306,15 +306,11 @@ li{
   box-shadow:0 0 0 6px #c98a5b,0 20px 60px rgba(0,0,0,.7);
 }
 
-/* Светлая тема */
+/* СВЕТЛАЯ ТЕМА */
 
 #stage.theme-light{
   background:linear-gradient(135deg,#fffdf8 0%,#f1e7d8 100%);
   color:#34251c;
-}
-
-#stage.theme-light::before{
-  opacity:.045;
 }
 
 #stage.theme-light .cu{
@@ -359,16 +355,11 @@ li{
   box-shadow:0 0 0 6px #b8794e,0 20px 60px rgba(80,48,28,.18);
 }
 
-/* Премиальная тема */
+/* ПРЕМИАЛЬНАЯ ТЕМА */
 
 #stage.theme-luxury{
   background:linear-gradient(135deg,#090909 0%,#17130e 55%,#080808 100%);
   color:#fff1d5;
-}
-
-#stage.theme-luxury::before{
-  content:none!important;
-  display:none!important;
 }
 
 #stage.theme-luxury .cu{
@@ -506,7 +497,7 @@ li{
   font-size:28px;
 }
 
-/* Фон экрана 3 — только изображение Magnific */
+/* ФОН MAGNIFIC — БЕЗ СТАРОГО ФОНА */
 
 #stage.screen3-stage.screen3-bg{
   background:
@@ -514,17 +505,117 @@ li{
     center center / cover no-repeat !important;
 }
 
-/* Отключаем все старые псевдофоны */
+/* АНИМАЦИЯ ДЫМА */
 
-#stage.screen3-stage.screen3-bg::before,
-#stage.screen3-stage.screen3-bg::after{
-  content:none!important;
-  display:none!important;
-  background:none!important;
-  opacity:0!important;
+#stage.screen3-stage.screen3-bg::before{
+  content:"";
+  position:absolute;
+  inset:-12%;
+  z-index:0;
+  pointer-events:none;
+
+  background:
+    radial-gradient(
+      ellipse at 18% 78%,
+      rgba(175,175,175,.15) 0%,
+      rgba(125,125,125,.07) 20%,
+      transparent 48%
+    ),
+    radial-gradient(
+      ellipse at 75% 65%,
+      rgba(190,180,165,.13) 0%,
+      rgba(120,115,105,.06) 25%,
+      transparent 52%
+    ),
+    radial-gradient(
+      ellipse at 48% 95%,
+      rgba(160,150,140,.12) 0%,
+      transparent 45%
+    );
+
+  filter:blur(38px);
+  opacity:.65;
+  transform:translate3d(-2%,2%,0) scale(1.05);
+  animation:farmajoSmoke 19s ease-in-out infinite alternate;
 }
 
-/* Карточки блюд */
+/* АНИМАЦИЯ СВЕЧЕНИЯ УГЛЕЙ */
+
+#stage.screen3-stage.screen3-bg::after{
+  content:"";
+  position:absolute;
+  left:-8%;
+  right:-8%;
+  bottom:-15%;
+  height:48%;
+  z-index:1;
+  pointer-events:none;
+
+  background:
+    radial-gradient(
+      ellipse at 18% 100%,
+      rgba(255,75,18,.30) 0%,
+      rgba(220,75,20,.12) 28%,
+      transparent 65%
+    ),
+    radial-gradient(
+      ellipse at 78% 100%,
+      rgba(255,135,35,.25) 0%,
+      rgba(205,85,20,.10) 32%,
+      transparent 68%
+    ),
+    radial-gradient(
+      ellipse at 50% 100%,
+      rgba(255,105,25,.20) 0%,
+      transparent 60%
+    );
+
+  filter:blur(30px);
+  opacity:.75;
+  transform:scale(1);
+  transform-origin:center bottom;
+  animation:farmajoGlow 5s ease-in-out infinite alternate;
+}
+
+/* ДВИЖЕНИЕ ДЫМА */
+
+@keyframes farmajoSmoke{
+  0%{
+    transform:translate3d(-3%,3%,0) scale(1.02);
+    opacity:.35;
+  }
+
+  50%{
+    transform:translate3d(2%,-2%,0) scale(1.10);
+    opacity:.70;
+  }
+
+  100%{
+    transform:translate3d(4%,-5%,0) scale(1.16);
+    opacity:.48;
+  }
+}
+
+/* ПУЛЬСАЦИЯ ЖАРА */
+
+@keyframes farmajoGlow{
+  0%{
+    opacity:.48;
+    transform:scale(.96);
+  }
+
+  50%{
+    opacity:.85;
+    transform:scale(1.04);
+  }
+
+  100%{
+    opacity:.58;
+    transform:scale(1);
+  }
+}
+
+/* КАРТОЧКИ БЛЮД */
 
 #stage.screen3-stage #menu.screen3.luxury-paged .menu-page section ul{
   padding:8px 4px 12px;
@@ -576,7 +667,7 @@ li{
   letter-spacing:.035em;
 }
 
-/* Заголовок третьего экрана */
+/* ЗАГОЛОВОК ЭКРАНА 3 */
 
 #stage.screen3-stage #menu.screen3.luxury-paged header{
   height:150px;
@@ -589,6 +680,30 @@ li{
   left:64px;
   width:104px;
   height:104px;
+}
+
+/* СЛАЙДЫ КАТЕГОРИЙ */
+
+#stage.theme-luxury #menu.screen3.luxury-paged{
+  position:relative;
+}
+
+#stage.theme-luxury #menu.screen3.luxury-paged .menu-page{
+  position:absolute;
+  left:0;
+  right:0;
+  top:150px;
+  bottom:26px;
+  opacity:0;
+  transform:translateX(34px);
+  transition:opacity .7s ease,transform .7s ease;
+  pointer-events:none;
+}
+
+#stage.theme-luxury #menu.screen3.luxury-paged .menu-page.active{
+  opacity:1;
+  transform:translateX(0);
+  pointer-events:auto;
 }
 
 #stage.theme-luxury #menu.screen3.luxury-paged header{
@@ -611,30 +726,6 @@ li{
   margin:0;
   text-align:center;
   font-size:76px;
-}
-
-/* Слайды категорий */
-
-#stage.theme-luxury #menu.screen3.luxury-paged{
-  position:relative;
-}
-
-#stage.theme-luxury #menu.screen3.luxury-paged .menu-page{
-  position:absolute;
-  left:0;
-  right:0;
-  top:150px;
-  bottom:26px;
-  opacity:0;
-  transform:translateX(34px);
-  transition:opacity .7s ease,transform .7s ease;
-  pointer-events:none;
-}
-
-#stage.theme-luxury #menu.screen3.luxury-paged .menu-page.active{
-  opacity:1;
-  transform:translateX(0);
-  pointer-events:auto;
 }
 
 #stage.theme-luxury #menu.screen3.luxury-paged .menu-page main{
@@ -660,7 +751,7 @@ li{
   text-align:center;
 }
 
-/* Сетка 3 на 3 */
+/* СЕТКА 3 НА 3 */
 
 #stage.theme-luxury #menu.screen3.luxury-paged .menu-page section ul{
   display:grid;
@@ -716,7 +807,7 @@ li{
   font-size:27px;
 }
 
-/* Мобильная версия */
+/* УЗКИЙ ЭКРАН */
 
 #stage.theme-luxury #menu.screen3.narrow.luxury-paged header{
   height:92px;
@@ -772,7 +863,21 @@ li{
   font-size:22px;
 }
 
+/* СЛОИ: ФОН, ЭФФЕКТЫ, МЕНЮ */
+
+#stage.screen3-stage.screen3-bg > *{
+  position:relative;
+  z-index:2;
+}
+
+/* Уважение настройки уменьшения анимации */
+
 @media(prefers-reduced-motion:reduce){
+  #stage.screen3-stage.screen3-bg::before,
+  #stage.screen3-stage.screen3-bg::after{
+    animation:none;
+  }
+
   #stage.theme-luxury #menu.screen3.luxury-paged .menu-page{
     transition:none;
   }
@@ -1022,7 +1127,7 @@ function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled){
   el.play().catch(()=>{});
 }
 
-/* Переключение категорий */
+/* ПЕРЕКЛЮЧЕНИЕ КАТЕГОРИЙ */
 
 function stopMenuPaging(){
 
@@ -1062,7 +1167,7 @@ function startMenuPaging(){
   },9000);
 }
 
-/* Подгонка текста */
+/* ПОДГОНКА ТЕКСТА */
 
 function fit(){
 
@@ -1088,7 +1193,7 @@ if(document.fonts&&document.fonts.ready){
   document.fonts.ready.then(fit);
 }
 
-/* Обновление меню */
+/* ОБНОВЛЕНИЕ МЕНЮ */
 
 async function refresh(){
 
@@ -1130,7 +1235,7 @@ setInterval(refresh,60000);
 
 refresh();
 
-/* Масштабирование экрана */
+/* МАСШТАБИРОВАНИЕ ЭКРАНА */
 
 function f(){
 
