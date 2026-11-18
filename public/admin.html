@@ -73,10 +73,11 @@ async function act(d){const a=d.act;
  else if(a==='delcat'||a==='delitem'||a==='delvid'){if(!confirm('Удалить? Это нельзя отменить.'))return;await run(sb.from({delcat:'categories',delitem:'items',delvid:'videos'}[a]).delete().eq('id',d.id))}
  await load()}catch(x){console.error(x)}}
 function show(on){$('#login').hidden=on;$('#reset').hidden=true;$('#main').hidden=!on;if(on&&!isOn)load();isOn=on}
+async function showSession(session){const user=session&&session.user;if(!user){show(false);return}if(user.app_metadata?.role!=='admin'){await sb.auth.signOut();$('#le').textContent='У этого аккаунта нет прав администратора FARMAJO';show(false);return}show(true)}
 function showReset(){$('#login').hidden=true;$('#main').hidden=true;$('#reset').hidden=false}
 $('#go').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('#em').value.trim(),password:$('#pw').value});$('#le').textContent=error?'Неверный e-mail или пароль':''};
 $('#forgot').onclick=async()=>{const email=$('#em').value.trim();if(!email){$('#le').textContent='Введите e-mail, затем нажмите ещё раз';return}const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});$('#le').textContent=error?'Ошибка: '+error.message:'Проверьте почту: мы отправили ссылку для нового пароля'};
-$('#savepw').onclick=async()=>{const password=$('#newpw').value;if(password.length<8){$('#re').textContent='Пароль должен содержать минимум 8 символов';return}const {error}=await sb.auth.updateUser({password});if(error){$('#re').textContent='Ошибка: '+error.message;return}$('#re').textContent='Пароль сохранён. Открываем админ-панель…';history.replaceState({},document.title,location.pathname);setTimeout(()=>show(true),700)};
-sb.auth.onAuthStateChange((event,s)=>{if(event==='PASSWORD_RECOVERY'){recoveryMode=true;showReset();return}if(!recoveryMode)show(!!s)});
-sb.auth.getSession().then(({data})=>{if(recoveryMode)showReset();else show(!!data.session)});
+$('#savepw').onclick=async()=>{const password=$('#newpw').value;if(password.length<8){$('#re').textContent='Пароль должен содержать минимум 8 символов';return}const {error}=await sb.auth.updateUser({password});if(error){$('#re').textContent='Ошибка: '+error.message;return}$('#re').textContent='Пароль сохранён. Открываем админ-панель…';history.replaceState({},document.title,location.pathname);setTimeout(async()=>{const {data}=await sb.auth.getSession();await showSession(data.session)},700)};
+sb.auth.onAuthStateChange(async(event,s)=>{if(event==='PASSWORD_RECOVERY'){recoveryMode=true;showReset();return}if(!recoveryMode)await showSession(s)});
+sb.auth.getSession().then(async({data})=>{if(recoveryMode)showReset();else await showSession(data.session)});
 </script></body></html>
