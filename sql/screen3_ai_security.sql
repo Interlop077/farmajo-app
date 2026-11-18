@@ -15,7 +15,7 @@ create table if not exists public.ai_menu_drafts (
 );
 
 alter table public.ai_menu_drafts enable row level security;
-revoke all on public.ai_menu_drafts from anon, authenticated;
+revoke all on public.ai_menu_drafts from public, anon, authenticated;
 
 create or replace function public.create_ai_menu_draft(
   p_summary text,
@@ -59,8 +59,8 @@ as $$
 declare
   d public.ai_menu_drafts%rowtype;
   op jsonb;
-  v_category uuid;
-  v_item uuid;
+  v_category public.categories.id%type;
+  v_item public.items.id%type;
   v_patch jsonb;
   v_count integer := 0;
   v_sort integer;
@@ -85,7 +85,8 @@ begin
   for op in select value from jsonb_array_elements(d.operations)
   loop
     if op->>'type' not in ('create_item','update_item') then raise exception 'operation type not allowed'; end if;
-    v_category := (op->>'category_id')::uuid;
+    select c.id into v_category from public.categories c where c.id::text=op->>'category_id';
+    if v_category is null then raise exception 'unknown category'; end if;
 
     if not exists (
       select 1 from public.screen_categories sc
@@ -96,28 +97,28 @@ begin
     ) then raise exception 'category is not exclusive to screen3' using errcode='42501'; end if;
 
     if op->>'type'='create_item' then
-      if coalesce(nullif(trim(op->>'name'),''),'')='' then raise exception 'new item name required'; end if;
-      if op->>'price' is not null and (op->>'price')::numeric < 0 then raise exception 'invalid price'; end if;
-      if op->>'weight_g' is not null and (op->>'weight_g')::integer <= 0 then raise exception 'invalid weight'; end if;
+      if coalesce(nullif(trim(op->>'name'),''),'')='' or length(op->>'name')>120 then raise exception 'new item name required or too long'; end if;
+      if op->>'price' is not null and ((op->>'price')::numeric < 0 or (op->>'price')::numeric > 1000000) then raise exception 'invalid price'; end if;
+      if op->>'weight_g' is not null and ((op->>'weight_g')::integer <= 0 or (op->>'weight_g')::integer > 100000) then raise exception 'invalid weight'; end if;
       select coalesce(max(sort)+1,0) into v_sort from public.items where category_id=v_category;
       insert into public.items(category_id,name,price,weight_g,active,sort)
       values(v_category,op->>'name',nullif(op->>'price','null')::numeric,
         nullif(op->>'weight_g','null')::integer,
         coalesce((op->>'active')::boolean,true),v_sort);
     else
-      v_item := (op->>'id')::uuid;
-      if not exists(select 1 from public.items i where i.id=v_item and i.category_id=v_category) then
+      select i.id into v_item from public.items i where i.id::text=op->>'id' and i.category_id=v_category;
+      if v_item is null then
         raise exception 'item is not in exclusive screen3 category' using errcode='42501';
       end if;
-      if op ? 'name' and op->>'name' is not null and trim(op->>'name')<>'' then
+      if op ? 'name' and op->>'name' is not null and trim(op->>'name')<>'' and length(op->>'name')<=120 then
         update public.items set name=op->>'name' where id=v_item;
       end if;
       if op ? 'price' and op->>'price' is not null then
-        if (op->>'price')::numeric < 0 then raise exception 'invalid price'; end if;
+        if (op->>'price')::numeric < 0 or (op->>'price')::numeric > 1000000 then raise exception 'invalid price'; end if;
         update public.items set price=(op->>'price')::numeric where id=v_item;
       end if;
       if op ? 'weight_g' and op->>'weight_g' is not null then
-        if (op->>'weight_g')::integer <= 0 then raise exception 'invalid weight'; end if;
+        if (op->>'weight_g')::integer <= 0 or (op->>'weight_g')::integer > 100000 then raise exception 'invalid weight'; end if;
         update public.items set weight_g=(op->>'weight_g')::integer where id=v_item;
       end if;
       if op ? 'active' and op->>'active' is not null then

@@ -12,11 +12,19 @@ insert into public.screens (id, name, menu_width, video_enabled)
 values ('screen3', 'Шашлычная', 100, false)
 on conflict (id) do nothing;
 
+-- Убираем только связь screen3 с категориями, которые одновременно принадлежат screen1/2.
+-- Связи screen1/2 и сами категории/блюда не изменяются.
+delete from public.screen_categories s3
+using public.screen_categories legacy
+where s3.screen_id='screen3'
+  and legacy.category_id=s3.category_id
+  and legacy.screen_id in ('screen1','screen2');
+
 do $migration$
 declare
   v_name text;
   v_sort integer;
-  v_category_id uuid;
+  v_category_id public.categories.id%type;
 begin
   for v_name, v_sort in
     select * from (values

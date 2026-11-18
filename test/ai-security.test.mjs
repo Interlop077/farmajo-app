@@ -58,6 +58,14 @@ test("screen1 and screen2 categories are explicitly forbidden",()=>{
  assert.ok(sql.includes("category is not exclusive to screen3"));
 });
 
+test("migration detaches shared legacy category links and is idempotent",()=>{
+ const migration=readFileSync(new URL("../sql/screen3_shashlychnaya.sql",import.meta.url),"utf8").toLowerCase();
+ assert.ok(migration.includes("delete from public.screen_categories s3"));
+ assert.ok(migration.includes("legacy.screen_id in ('screen1','screen2')"));
+ assert.ok(migration.includes("pg_advisory_xact_lock"));
+ assert.ok(migration.includes("on conflict (screen_id, category_id)"));
+ assert.ok(migration.includes("public.categories.id%type"));
+});
 test("one bad operation aborts the single PostgreSQL RPC transaction",()=>{
  assert.ok(sql.includes("for op in select value from jsonb_array_elements(d.operations)"));
  assert.ok(sql.includes("security definer"));
