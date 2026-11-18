@@ -12,8 +12,26 @@ insert into public.screens (id, name, menu_width, video_enabled)
 values ('screen3', 'Шашлычная', 100, false)
 on conflict (id) do nothing;
 
--- Убираем только связь screen3 с категориями, которые одновременно принадлежат screen1/2.
--- Связи screen1/2 и сами категории/блюда не изменяются.
+-- Если общая категория уже содержит блюда, нельзя автоматически решить,
+-- какие из них относятся к шашлычной. Останавливаем миграцию, чтобы не скрыть
+-- существующие позиции screen3 и не затронуть данные экранов 1/2.
+do $guard$
+begin
+  if exists (
+    select 1
+    from public.screen_categories s3
+    join public.screen_categories legacy
+      on legacy.category_id = s3.category_id
+     and legacy.screen_id in ('screen1', 'screen2')
+    join public.items i on i.category_id = s3.category_id
+    where s3.screen_id = 'screen3'
+  ) then
+    raise exception 'Найдены общие категории screen3 и screen1/screen2 с блюдами. Сначала вручную проверьте и разделите позиции; миграция остановлена без изменений.';
+  end if;
+end
+$guard$;
+
+-- Убираем только пустые общие связи screen3. Связи screen1/2 и сами категории/блюда не изменяются.
 delete from public.screen_categories s3
 using public.screen_categories legacy
 where s3.screen_id='screen3'
