@@ -31,6 +31,17 @@ test("direct request without a previously stored draft is blocked in mock",async
  assert.equal(out.statusCode,403);assert.equal(calls,0);
 });
 
+test("arbitrary draft id without a persisted row is rejected by PostgreSQL RPC",async()=>{
+ process.env.AI_MODE="openai";process.env.SUPABASE_URL="https://db.test";process.env.SUPABASE_PUBLISHABLE_KEY="public";
+ let rpcBody;
+ globalThis.fetch=async(url,opts={})=>{
+  if(String(url).endsWith("/auth/v1/user"))return response(200,{id:"user-a"});
+  if(String(url).endsWith("/rpc/apply_ai_menu_draft")){rpcBody=JSON.parse(opts.body);return response(404,{message:"draft not found"});}
+  throw Error("unexpected request");
+ };
+ const out=await applyHandler(event({draft_id:"not-created",operations_hash:"forged"}));
+ assert.equal(out.statusCode,409);assert.equal(rpcBody.p_draft_id,"not-created");
+});
 test("changed operations supplied by client are rejected; hash is verified against stored JSON",async()=>{
  process.env.AI_MODE="openai";process.env.SUPABASE_URL="https://db.test";process.env.SUPABASE_PUBLISHABLE_KEY="public";
  let rpcCalls=0;globalThis.fetch=async(url)=>{if(String(url).endsWith("/auth/v1/user"))return response(200,{id:"u"});rpcCalls++;return response(200,{});};
