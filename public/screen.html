@@ -90,6 +90,23 @@ li{display:flex;align-items:baseline;height:33px;font-size:22px;font-weight:700;
 #embers{display:none;position:absolute;inset:0;width:1920px;height:1080px;pointer-events:none;z-index:1}
 #stage.screen3-stage #embers{display:block}
 #stage.screen3-stage #menu,#stage.screen3-stage #video{z-index:2}
+/* Full charcoal-and-gold barbecue scene, limited to luxury screen 3. */
+#stage.screen3-stage{background:
+ radial-gradient(ellipse at 50% 112%,rgba(235,104,28,.24) 0%,rgba(143,57,19,.13) 22%,transparent 54%),
+ radial-gradient(ellipse at 12% 85%,rgba(179,103,34,.12),transparent 36%),
+ radial-gradient(ellipse at 88% 82%,rgba(179,103,34,.11),transparent 34%),
+ linear-gradient(180deg,#080808 0%,#100e0b 56%,#17100b 100%)}
+#stage.screen3-stage::before{opacity:.19}
+#stage.screen3-stage #menu.screen3.luxury-paged .menu-page section ul{padding:8px 4px 12px}
+#stage.screen3-stage #menu.screen3.luxury-paged .dish-card{position:relative;border:1px solid rgba(231,183,91,.72);border-radius:15px;background:linear-gradient(155deg,rgba(57,43,25,.98) 0%,rgba(24,20,15,.99) 52%,rgba(10,10,9,.99) 100%);box-shadow:0 12px 30px rgba(0,0,0,.58),0 0 16px rgba(190,126,43,.10);transition:transform .25s ease,border-color .25s ease}
+#stage.screen3-stage #menu.screen3.luxury-paged .dish-card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(135deg,rgba(255,231,177,.12),transparent 34%,transparent 72%,rgba(220,158,66,.07))}
+#stage.screen3-stage #menu.screen3.luxury-paged .dish-photo{height:150px;object-fit:cover;filter:saturate(1.08) contrast(1.04)}
+#stage.screen3-stage #menu.screen3.luxury-paged .dish-info{padding:10px 11px 12px;gap:7px;background:linear-gradient(180deg,rgba(38,29,18,.98),rgba(13,12,10,.99))}
+#stage.screen3-stage #menu.screen3.luxury-paged .dish-name{font-size:20px;color:#fff0cf;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+#stage.screen3-stage #menu.screen3.luxury-paged .dish-meta .p{font-size:23px;color:#f0c66f}
+#stage.screen3-stage #menu.screen3.luxury-paged .dish-meta .v{font-size:15px;color:#d8b979}
+#stage.screen3-stage #menu.screen3.luxury-paged .dish-placeholder{background:radial-gradient(ellipse at 50% 28%,#79512b 0%,#342317 48%,#100d09 100%);color:#f0c66f}
+#stage.screen3-stage #menu.screen3.luxury-paged .menu-page section h2{text-shadow:0 3px 18px rgba(225,164,66,.28);letter-spacing:.035em}
 /* Screen 3 luxury: denser responsive cards and automatic animated pages. */
 #stage.theme-luxury #menu.screen3.luxury-paged{position:relative}
 #stage.theme-luxury #menu.screen3.luxury-paged .menu-page{position:absolute;left:0;right:0;top:150px;bottom:26px;opacity:0;transform:translateX(34px);transition:opacity .7s ease,transform .7s ease;pointer-events:none}
