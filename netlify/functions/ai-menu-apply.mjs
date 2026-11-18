@@ -10,6 +10,8 @@ export async function handler(event){
     const headers={apikey:key,Authorization:"Bearer "+token};
     const me=await fetch(url+"/auth/v1/user",{headers});
     if(!me.ok)return json(401,{error:"Сессия недействительна"});
+    const user=await me.json();
+    if(user?.app_metadata?.role!=="admin")return json(403,{error:"Доступ запрещён: требуется роль администратора FARMAJO"});
     const body=JSON.parse(event.body||"{}");
     if(!body.draft_id||!body.operations_hash||body.operations!==undefined)return json(400,{error:"Передайте только draft_id и operations_hash; операции клиентом не принимаются"});
     const r=await fetch(url+"/rest/v1/rpc/apply_ai_menu_draft",{method:"POST",headers:{...headers,"Content-Type":"application/json"},body:JSON.stringify({p_draft_id:body.draft_id,p_operations_hash:body.operations_hash})});
