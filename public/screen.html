@@ -50,7 +50,7 @@ function render(scr,cats,items,vids){
  const body=cats.map(c=>{const li=items.filter(i=>i.category_id===c.id).map(i=>`<li>${i.photo_url?`<img class="ph" src="${esc(i.photo_url)}" alt="">`:''}<span class="n">${esc(i.name)}</span>${i.volume_ml?`<span class="v">${i.volume_ml} мл</span>`:''}<span class="d"></span><span class="p cu">${+i.price}</span></li>`).join('');return li?`<section><h2 class="cu">${esc(c.name)}</h2><ul>${li}</ul></section>`:''}).join('');
  const title=cats.length&&cats.every(c=>c.season)?'Сезонное меню':'Меню';
  const head=wide?'<header><img src="logo.png" alt="FARMAJO"><div class="t cu">FARMAJO</div><div class="s">Меню</div></header>':`<div class="mt cu">${title}</div>`;
- const m=document.getElementById('menu');m.className=wide?'':'narrow';m.style.width=mw+'px';m.innerHTML=head+'<main>'+body+'</main>';
+ const m=document.getElementById('menu');m.className=wide?'':'narrow';m.style.width=mw+'px';m.innerHTML=head+'<main>'+body+'</main>';fit();
  const v=document.getElementById('video');v.style.display=vid&&!wide?'flex':'none';v.style.width=(1920-mw)+'px';
  const key=JSON.stringify([vid&&!wide,vids.map(x=>x.url)]);if(key===vkey)return;vkey=key;
  if(!(vid&&!wide))return;
@@ -58,6 +58,8 @@ function render(scr,cats,items,vids){
  v.innerHTML='<video muted autoplay playsinline></video>';const el=v.firstChild;el.muted=true;let n=0;el.src=vids[0].url;el.loop=vids.length===1;
  el.onended=()=>{n=(n+1)%vids.length;el.src=vids[n].url;el.play()};el.play().catch(()=>{});
 }
+function fit(){document.querySelectorAll('#menu li').forEach(li=>{const n=li.querySelector('.n');n.style.fontSize='';let fs=parseFloat(getComputedStyle(n).fontSize);while(li.scrollWidth>li.clientWidth+1&&fs>14){fs-=1;n.style.fontSize=fs+'px'}})}
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
 async function refresh(){if(busy){again=true;return}busy=true;try{await load()}catch(e){console.error(e);setTimeout(refresh,10000)}busy=false;if(again){again=false;refresh()}}
 let t;sb.channel('live').on('postgres_changes',{event:'*',schema:'public'},()=>{clearTimeout(t);t=setTimeout(refresh,400)}).subscribe();
 setInterval(refresh,60000);refresh();

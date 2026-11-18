@@ -1,0 +1,1 @@
+window.CFG={"url":"https://haotswzomqwlxslbageg.supabase.co","key":"sb_publishable_uuVj1DB21ZzJZ6PuRRvHEA_6Me6katN"};
