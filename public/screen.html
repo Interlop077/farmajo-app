@@ -163,17 +163,23 @@ function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled){
  v.innerHTML='<video muted autoplay playsinline></video>';const el=v.firstChild;el.muted=true;let n=0;el.src=vids[0].url;el.loop=vids.length===1;
  el.onended=()=>{n=(n+1)%vids.length;el.src=vids[n].url;el.play()};el.play().catch(()=>{});
 }
-let emberRaf=0,emberParticles=[];
-function stopEmbers(){if(emberRaf)cancelAnimationFrame(emberRaf);emberRaf=0;emberParticles=[];const canvas=document.getElementById('embers');if(canvas){const ctx=canvas.getContext('2d');if(ctx)ctx.clearRect(0,0,canvas.width,canvas.height)}}
+let emberRaf=0,emberParticles=[],emberCoals=[];
+function stopEmbers(){if(emberRaf)cancelAnimationFrame(emberRaf);emberRaf=0;emberParticles=[];emberCoals=[];const canvas=document.getElementById('embers');if(canvas){const ctx=canvas.getContext('2d');if(ctx)ctx.clearRect(0,0,canvas.width,canvas.height)}}
 function startEmbers(){
  stopEmbers();
  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
  const canvas=document.getElementById('embers');if(!canvas)return;
  const ctx=canvas.getContext('2d');if(!ctx)return;
  canvas.width=1920;canvas.height=1080;
- emberParticles=Array.from({length:58},()=>({x:Math.random()*1920,y:Math.random()*1080,r:1+Math.random()*2.5,vy:.22+Math.random()*.72,vx:(Math.random()-.5)*.32,a:.12+Math.random()*.42,phase:Math.random()*Math.PI*2,spark:Math.random()<.13}));
+ emberParticles=Array.from({length:72},()=>({x:Math.random()*1920,y:Math.random()*1080,r:1+Math.random()*2.5,vy:.22+Math.random()*.82,vx:(Math.random()-.5)*.32,a:.12+Math.random()*.46,phase:Math.random()*Math.PI*2,spark:Math.random()<.16}));
+ emberCoals=Array.from({length:64},()=>({x:Math.random()*1980-30,y:965+Math.random()*105,rx:8+Math.random()*24,ry:4+Math.random()*10,phase:Math.random()*Math.PI*2,heat:.35+Math.random()*.65}));
  const draw=()=>{
   ctx.clearRect(0,0,1920,1080);
+  /* Low bed of glowing charcoal with slowly breathing orange-red heat. */
+  const bed=ctx.createLinearGradient(0,900,0,1080);bed.addColorStop(0,'rgba(12,8,5,0)');bed.addColorStop(.42,'rgba(16,10,6,.38)');bed.addColorStop(1,'rgba(5,4,3,.92)');ctx.fillStyle=bed;ctx.fillRect(0,900,1920,180);
+  const glow=ctx.createRadialGradient(960,1035,8,960,1035,760);glow.addColorStop(0,'rgba(236,91,25,.22)');glow.addColorStop(.42,'rgba(170,54,15,.13)');glow.addColorStop(1,'rgba(80,24,8,0)');ctx.fillStyle=glow;ctx.fillRect(0,850,1920,230);
+  for(const c of emberCoals){const pulse=.78+.22*Math.sin(c.phase+=.008);ctx.save();ctx.translate(c.x,c.y);ctx.rotate(Math.sin(c.phase)*.12);ctx.fillStyle='rgba(12,10,8,.96)';ctx.shadowColor='rgba(0,0,0,.9)';ctx.shadowBlur=8;ctx.beginPath();ctx.ellipse(0,0,c.rx,c.ry,0,0,Math.PI*2);ctx.fill();ctx.shadowColor='rgba(255,76,18,'+(c.heat*pulse*.72)+')';ctx.shadowBlur=9+12*pulse;ctx.strokeStyle='rgba(255,112,35,'+(c.heat*pulse*.42)+')';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,c.rx*.66,c.ry*.48,0,0,Math.PI*2);ctx.stroke();ctx.restore()}
+
   for(const p of emberParticles){
    p.y-=p.vy;p.x+=p.vx+Math.sin(p.phase+=.012)*.16;
    if(p.y<-12){p.y=1090;p.x=Math.random()*1920}
