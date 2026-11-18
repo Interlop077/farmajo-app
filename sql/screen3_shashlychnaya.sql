@@ -49,6 +49,7 @@ select 'screen3', c.id, true, d.sort
 from screen3_categories c
 join desired d on d.name = c.name
 on conflict (screen_id, category_id)
-do update set visible = true, sort = excluded.sort;
+-- При повторном запуске обновляем порядок, но сохраняем ручную видимость категории.
+do update set sort = excluded.sort;
 
 commit;
