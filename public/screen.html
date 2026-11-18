@@ -86,6 +86,10 @@ li{display:flex;align-items:baseline;height:33px;font-size:22px;font-weight:700;
 #stage.theme-luxury #menu.screen3.narrow .dish-photo{height:190px}
 #stage.theme-luxury #menu.screen3.narrow .dish-name{font-size:28px}
 
+/* Subtle live ember and spark ambience, restricted to luxury screen 3. */
+#embers{display:none;position:absolute;inset:0;width:1920px;height:1080px;pointer-events:none;z-index:1}
+#stage.screen3-stage #embers{display:block}
+#stage.screen3-stage #menu,#stage.screen3-stage #video{z-index:2}
 /* Screen 3 luxury: denser responsive cards and automatic animated pages. */
 #stage.theme-luxury #menu.screen3.luxury-paged{position:relative}
 #stage.theme-luxury #menu.screen3.luxury-paged .menu-page{position:absolute;left:0;right:0;top:150px;bottom:26px;opacity:0;transform:translateX(34px);transition:opacity .7s ease,transform .7s ease;pointer-events:none}
@@ -108,7 +112,7 @@ li{display:flex;align-items:baseline;height:33px;font-size:22px;font-weight:700;
 #stage.theme-luxury #menu.screen3.narrow.luxury-paged .dish-photo{height:116px}
 @media(prefers-reduced-motion:reduce){#stage.theme-luxury #menu.screen3.luxury-paged .menu-page{transition:none}}
 
-</style></head><body><div id="stage"><div id="menu"></div><div id="video"></div></div>
+</style></head><body><div id="stage"><canvas id="embers" aria-hidden="true"></canvas><div id="menu"></div><div id="video"></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script><script src="config.js"></script><script>
 const sb=supabase.createClient(CFG.url,CFG.key),ID=new URLSearchParams(location.search).get('id')||'screen1';let vkey='',busy=false,again=false;
 let menuPageTimer=null,menuPageIndex=0;
@@ -120,7 +124,7 @@ async function load(){
  render(r[0].data,r[1].data.filter(c=>vis[c.id]&&(!c.season||c.season===season)),r[2].data,r[4].data.filter(v=>!v.season||v.season===season),screen3Logo,screen3LogoEnabled);
 }
 function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled){
- const selectedTheme=(window.__menuTheme||'dark');document.getElementById('stage').classList.toggle('theme-light',selectedTheme==='light');document.getElementById('stage').classList.toggle('theme-luxury',selectedTheme==='luxury');
+ const selectedTheme=(window.__menuTheme||'dark');document.getElementById('stage').classList.toggle('theme-light',selectedTheme==='light');document.getElementById('stage').classList.toggle('theme-luxury',selectedTheme==='luxury');document.getElementById('stage').classList.toggle('screen3-stage',ID==='screen3'&&selectedTheme==='luxury');if(ID==='screen3'&&selectedTheme==='luxury')startEmbers();else stopEmbers();
  const vid=!!scr.video_enabled,wide=!vid||scr.menu_width>=60,mw=wide?1920:Math.round(1920*scr.menu_width/100);
  const luxury3=ID==='screen3'&&selectedTheme==='luxury';
  const dishCard=i=>`<li class="dish-card">${i.photo_url?`<img class="dish-photo" src="${esc(i.photo_url)}" alt="${esc(i.name)}">`:`<div class="dish-photo dish-placeholder" aria-hidden="true">FARMAJO</div>`}<div class="dish-info"><span class="n dish-name">${esc(i.name)}</span><div class="dish-meta">${i.weight_g?`<span class="v">${i.weight_g} г</span>`:i.volume_ml?`<span class="v">${i.volume_ml} мл</span>`:''}<span class="p cu">${+i.price}</span></div></div></li>`;
@@ -143,6 +147,31 @@ function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled){
  if(!vids.length){v.innerHTML=showLogo?`<img src="${esc(logo)}" alt="${esc(scr.name)}">`:'';return}
  v.innerHTML='<video muted autoplay playsinline></video>';const el=v.firstChild;el.muted=true;let n=0;el.src=vids[0].url;el.loop=vids.length===1;
  el.onended=()=>{n=(n+1)%vids.length;el.src=vids[n].url;el.play()};el.play().catch(()=>{});
+}
+let emberRaf=0,emberParticles=[];
+function stopEmbers(){if(emberRaf)cancelAnimationFrame(emberRaf);emberRaf=0;emberParticles=[];const canvas=document.getElementById('embers');if(canvas){const ctx=canvas.getContext('2d');if(ctx)ctx.clearRect(0,0,canvas.width,canvas.height)}}
+function startEmbers(){
+ stopEmbers();
+ if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ const canvas=document.getElementById('embers');if(!canvas)return;
+ const ctx=canvas.getContext('2d');if(!ctx)return;
+ canvas.width=1920;canvas.height=1080;
+ emberParticles=Array.from({length:58},()=>({x:Math.random()*1920,y:Math.random()*1080,r:1+Math.random()*2.5,vy:.22+Math.random()*.72,vx:(Math.random()-.5)*.32,a:.12+Math.random()*.42,phase:Math.random()*Math.PI*2,spark:Math.random()<.13}));
+ const draw=()=>{
+  ctx.clearRect(0,0,1920,1080);
+  for(const p of emberParticles){
+   p.y-=p.vy;p.x+=p.vx+Math.sin(p.phase+=.012)*.16;
+   if(p.y<-12){p.y=1090;p.x=Math.random()*1920}
+   if(p.x<-10)p.x=1930;if(p.x>1930)p.x=-10;
+   const pulse=.72+.28*Math.sin(p.phase*2);
+   ctx.beginPath();ctx.fillStyle=p.spark?'rgba(255,190,82,'+(p.a*pulse)+')':'rgba(226,111,39,'+(p.a*.62*pulse)+')';
+   ctx.shadowColor=p.spark?'rgba(255,165,54,.9)':'rgba(222,92,25,.65)';ctx.shadowBlur=p.spark?15:8;
+   ctx.arc(p.x,p.y,p.spark?p.r*1.35:p.r,0,Math.PI*2);ctx.fill();
+   if(p.spark&&pulse>.92){ctx.strokeStyle='rgba(255,204,119,'+(p.a*.35)+')';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(p.x-3,p.y);ctx.lineTo(p.x+3,p.y);ctx.moveTo(p.x,p.y-3);ctx.lineTo(p.x,p.y+3);ctx.stroke()}
+  }
+  ctx.shadowBlur=0;emberRaf=requestAnimationFrame(draw);
+ };
+ draw();
 }
 function stopMenuPaging(){if(menuPageTimer){clearInterval(menuPageTimer);menuPageTimer=null}menuPageIndex=0;}
 function startMenuPaging(){
