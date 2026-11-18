@@ -20,7 +20,7 @@ with desired(name, sort) as (
     ('Гарниры', 3),
     ('Закуски', 4),
     ('Соусы', 5),
-    ('Напитки', 6)
+    ('Напитки к шашлыку', 6)
 ),
 inserted as (
   insert into public.categories (name, season, sort)
