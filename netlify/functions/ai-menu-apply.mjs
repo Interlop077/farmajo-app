@@ -19,7 +19,7 @@ export async function handler(event){
     const fields=["name","price","weight_g","active"];
     for(const op of ops){
       if(!op||!["create_item","update_item"].includes(op.type)||!allowed.includes(String(op.category_id)))return json(403,{error:"Изменение заблокировано: доступ разрешён только отдельным категориям экрана 3"});
-      const patch={};for(const f of fields)if(op[f]!==null&&op[f]!==undefined)patch[f]=op[f];
+      const patch={};for(const f of fields)if(op[f]!==null&&op[f]!==undefined)patch[f]=op[f];\n      if(patch.name!==undefined&&(typeof patch.name!=="string"||!patch.name.trim()||patch.name.length>120))return json(400,{error:"Некорректное название позиции"});\n      if(patch.price!==undefined&&(typeof patch.price!=="number"||!Number.isFinite(patch.price)||patch.price<0||patch.price>1000000))return json(400,{error:"Некорректная цена"});\n      if(patch.weight_g!==undefined&&(!Number.isInteger(patch.weight_g)||patch.weight_g<1||patch.weight_g>100000))return json(400,{error:"Некорректный вес"});\n      if(patch.active!==undefined&&typeof patch.active!=="boolean")return json(400,{error:"Некорректный статус позиции"});
       if(op.type==="update_item"&&!items.some(i=>String(i.id)===String(op.id)&&String(i.category_id)===String(op.category_id)))return json(403,{error:"Позиция не принадлежит отдельному меню шашлычной"});
       if(op.type==="create_item"&&(!patch.name||typeof patch.name!=="string"))return json(400,{error:"У новой позиции должно быть название"});
       if(!Object.keys(patch).length&&op.type==="update_item")continue;
