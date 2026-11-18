@@ -1,55 +1,61 @@
--- FARMAJO: отдельная база категорий для экрана шашлычной.
--- Запустить один раз в Supabase SQL Editor после создания ветки/перед публикацией.
--- Категории создаются отдельными строками и привязываются ТОЛЬКО к screen3.
--- Существующие категории и позиции screen1/screen2 не переиспользуются и не меняются.
+-- FARMAJO / screen3: отдельные категории шашлычной.
+-- Идемпотентно: повторный запуск находит только screen3-категории,
+-- которые НЕ связаны с screen1 или screen2. Общие категории не переиспользуются.
+-- weight_g nullable; volume_ml и существующие записи не затрагиваются.
 
 begin;
+select pg_advisory_xact_lock(hashtext('farmajo:screen3:shashlychnaya'));
 
-alter table public.items
-  add column if not exists weight_g integer;
+alter table public.items add column if not exists weight_g integer;
 
 insert into public.screens (id, name, menu_width, video_enabled)
 values ('screen3', 'Шашлычная', 100, false)
 on conflict (id) do nothing;
 
-with desired(name, sort) as (
-  values
-    ('Шашлык', 0),
-    ('Люля-кебаб', 1),
-    ('Блюда на гриле', 2),
-    ('Гарниры', 3),
-    ('Закуски', 4),
-    ('Соусы', 5),
-    ('Напитки к шашлыку', 6)
-),
-inserted as (
-  insert into public.categories (name, season, sort)
-  select d.name, null, d.sort
-  from desired d
-  where not exists (
-    select 1
+do $migration$
+declare
+  v_name text;
+  v_sort integer;
+  v_category_id uuid;
+begin
+  for v_name, v_sort in
+    select * from (values
+      ('Шашлык', 0),
+      ('Люля-кебаб', 1),
+      ('Блюда на гриле', 2),
+      ('Гарниры', 3),
+      ('Закуски', 4),
+      ('Соусы', 5),
+      ('Напитки к шашлыку', 6)
+    ) as desired(name, sort)
+  loop
+    -- Берём только уже отдельную категорию screen3.
+    select c.id into v_category_id
     from public.categories c
-    join public.screen_categories sc on sc.category_id = c.id
-    where sc.screen_id = 'screen3'
-      and c.name = d.name
-  )
-  returning id, name
-),
-screen3_categories as (
-  select c.id, c.name
-  from public.categories c
-  join public.screen_categories sc on sc.category_id = c.id
-  where sc.screen_id = 'screen3'
-    and c.name in (select name from desired)
-  union
-  select id, name from inserted
-)
-insert into public.screen_categories (screen_id, category_id, visible, sort)
-select 'screen3', c.id, true, d.sort
-from screen3_categories c
-join desired d on d.name = c.name
-on conflict (screen_id, category_id)
--- При повторном запуске обновляем порядок, но сохраняем ручную видимость категории.
-do update set sort = excluded.sort;
+    join public.screen_categories s3
+      on s3.category_id = c.id and s3.screen_id = 'screen3'
+    where c.name = v_name
+      and not exists (
+        select 1 from public.screen_categories legacy
+        where legacy.category_id = c.id
+          and legacy.screen_id in ('screen1', 'screen2')
+      )
+    order by c.id
+    limit 1;
+
+    -- Если есть только общая категория (или нет категории), создаём новую строку/ID.
+    if v_category_id is null then
+      insert into public.categories (name, season, sort)
+      values (v_name, null, v_sort)
+      returning id into v_category_id;
+    end if;
+
+    insert into public.screen_categories (screen_id, category_id, visible, sort)
+    values ('screen3', v_category_id, true, v_sort)
+    on conflict (screen_id, category_id)
+    do update set sort = excluded.sort;
+  end loop;
+end
+$migration$;
 
 commit;
