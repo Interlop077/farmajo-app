@@ -58,6 +58,33 @@ li{display:flex;align-items:baseline;height:33px;font-size:22px;font-weight:700;
 #stage.theme-light #video{background:#eee1d1}
 #stage.theme-light header img{box-shadow:0 0 0 3px #b8794e,0 6px 22px rgba(80,48,28,.16)}
 #stage.theme-light #video img{box-shadow:0 0 0 6px #b8794e,0 20px 60px rgba(80,48,28,.18)}
+
+/* Luxury black-and-gold presentation. Screens 1/2 keep their existing text columns;
+   screen 3 uses large food photography cards while preserving category columns. */
+#stage.theme-luxury{background:radial-gradient(ellipse at 50% 105%,rgba(166,112,42,.22),transparent 58%),linear-gradient(135deg,#090909 0%,#17130e 55%,#080808 100%);color:#fff1d5}
+#stage.theme-luxury::before{opacity:.12}
+#stage.theme-luxury .cu{background:linear-gradient(180deg,#fff0bd 0%,#e5b85e 48%,#a66a22 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+#stage.theme-luxury header .s{color:#e7d4ae}
+#stage.theme-luxury .col{border-left-color:rgba(218,171,86,.42)}
+#stage.theme-luxury li{color:#fff1d5;text-shadow:0 2px 5px rgba(0,0,0,.7)}
+#stage.theme-luxury .v{color:#d5b77e}
+#stage.theme-luxury .ban{color:#171008;background:linear-gradient(90deg,#f0d28b,#b77b2c)}
+#stage.theme-luxury header img{box-shadow:0 0 0 3px #d2a34f,0 8px 28px rgba(0,0,0,.65)}
+#stage.theme-luxury #video{background:#090807}
+#stage.theme-luxury #video img{box-shadow:0 0 0 6px #d2a34f,0 20px 60px rgba(0,0,0,.7)}
+#stage.theme-luxury #menu.screen3 main{row-gap:12px}
+#stage.theme-luxury #menu.screen3 section{border-left-color:rgba(218,171,86,.35)}
+#stage.theme-luxury #menu.screen3 section ul{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:8px}
+#stage.theme-luxury #menu.screen3 .dish-card{display:flex;flex-direction:column;align-items:stretch;height:auto;min-height:0;margin:0;overflow:hidden;border:1px solid rgba(218,171,86,.48);border-radius:12px;background:linear-gradient(155deg,rgba(46,35,20,.96),rgba(15,13,10,.98));box-shadow:0 8px 22px rgba(0,0,0,.35);text-shadow:none}
+#stage.theme-luxury #menu.screen3 .dish-photo{display:block;width:100%;height:142px;object-fit:cover;flex:none;margin:0;border-radius:0}
+#stage.theme-luxury #menu.screen3 .dish-placeholder{display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 35%,#554024,#21180f 72%);color:#d7ad62;font:600 24px Oswald,"Arial Narrow",sans-serif;letter-spacing:.14em}
+#stage.theme-luxury #menu.screen3 .dish-info{display:flex;flex-direction:column;gap:7px;padding:10px 12px 11px;min-width:0}
+#stage.theme-luxury #menu.screen3 .dish-name{display:block;white-space:normal;font-size:23px;line-height:1.12;color:#fff0d1;text-shadow:none}
+#stage.theme-luxury #menu.screen3 .dish-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:24px}
+#stage.theme-luxury #menu.screen3 .dish-meta .v{margin:0;font-size:17px}
+#stage.theme-luxury #menu.screen3 .dish-meta .p{min-width:0;font-size:25px}
+#stage.theme-luxury #menu.screen3.narrow .dish-photo{height:190px}
+#stage.theme-luxury #menu.screen3.narrow .dish-name{font-size:28px}
 </style></head><body><div id="stage"><div id="menu"></div><div id="video"></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script><script src="config.js"></script><script>
 const sb=supabase.createClient(CFG.url,CFG.key),ID=new URLSearchParams(location.search).get('id')||'screen1';let vkey='',busy=false,again=false;
@@ -69,9 +96,9 @@ async function load(){
  render(r[0].data,r[1].data.filter(c=>vis[c.id]&&(!c.season||c.season===season)),r[2].data,r[4].data.filter(v=>!v.season||v.season===season),screen3Logo,screen3LogoEnabled);
 }
 function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled){
- const selectedTheme=(window.__menuTheme||'dark');document.getElementById('stage').classList.toggle('theme-light',selectedTheme==='light');
+ const selectedTheme=(window.__menuTheme||'dark');document.getElementById('stage').classList.toggle('theme-light',selectedTheme==='light');document.getElementById('stage').classList.toggle('theme-luxury',selectedTheme==='luxury');
  const vid=!!scr.video_enabled,wide=!vid||scr.menu_width>=60,mw=wide?1920:Math.round(1920*scr.menu_width/100);
- const body=cats.map(c=>{const li=items.filter(i=>i.category_id===c.id).map(i=>`<li>${i.photo_url?`<img class="ph" src="${esc(i.photo_url)}" alt="">`:''}<span class="n">${esc(i.name)}</span>${i.weight_g?`<span class="v">${i.weight_g} г</span>`:i.volume_ml?`<span class="v">${i.volume_ml} мл</span>`:''}<span class="d"></span><span class="p cu">${+i.price}</span></li>`).join('');return li?`<section><h2 class="cu">${esc(c.name)}</h2><ul>${li}</ul></section>`:''}).join('');
+ const body=cats.map(c=>{const li=items.filter(i=>i.category_id===c.id).map(i=>{if(ID==='screen3'&&selectedTheme==='luxury')return `<li class="dish-card">${i.photo_url?`<img class="dish-photo" src="${esc(i.photo_url)}" alt="${esc(i.name)}">`:`<div class="dish-photo dish-placeholder" aria-hidden="true">FARMAJO</div>`}<div class="dish-info"><span class="n dish-name">${esc(i.name)}</span><div class="dish-meta">${i.weight_g?`<span class="v">${i.weight_g} г</span>`:i.volume_ml?`<span class="v">${i.volume_ml} мл</span>`:''}<span class="p cu">${+i.price}</span></div></div></li>`;return `<li>${i.photo_url?`<img class="ph" src="${esc(i.photo_url)}" alt="">`:''}<span class="n">${esc(i.name)}</span>${i.weight_g?`<span class="v">${i.weight_g} г</span>`:i.volume_ml?`<span class="v">${i.volume_ml} мл</span>`:''}<span class="d"></span><span class="p cu">${+i.price}</span></li>`}).join('');return li?`<section><h2 class="cu">${esc(c.name)}</h2><ul>${li}</ul></section>`:''}).join('');
  const title=scr.name;
  const showLogo=ID!=='screen3'||screen3LogoEnabled;const logo=ID==='screen3'?(screen3Logo||'logo.png'):'logo.png';const head=wide?`<header class="${ID==='screen3'?'screen3-head':''}">${showLogo?`<img src="${esc(logo)}" alt="${esc(scr.name)}">`:''}<div class="t cu">${esc(scr.name)}</div></header>`:`<div class="mt cu">${esc(title)}</div>`;
  const m=document.getElementById('menu');m.className=(ID==='screen3'?'screen3 ':'')+(wide?'':'narrow');m.style.width=mw+'px';m.innerHTML=head+'<main>'+body+'</main>';fit();
@@ -82,7 +109,7 @@ function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled){
  v.innerHTML='<video muted autoplay playsinline></video>';const el=v.firstChild;el.muted=true;let n=0;el.src=vids[0].url;el.loop=vids.length===1;
  el.onended=()=>{n=(n+1)%vids.length;el.src=vids[n].url;el.play()};el.play().catch(()=>{});
 }
-function fit(){document.querySelectorAll('#menu li').forEach(li=>{const n=li.querySelector('.n');n.style.fontSize='';let fs=parseFloat(getComputedStyle(n).fontSize);while(li.scrollWidth>li.clientWidth+1&&fs>14){fs-=1;n.style.fontSize=fs+'px'}})}
+function fit(){document.querySelectorAll('#menu li').forEach(li=>{const n=li.querySelector('.n');if(!n)return;n.style.fontSize='';let fs=parseFloat(getComputedStyle(n).fontSize);while(li.scrollWidth>li.clientWidth+1&&fs>14){fs-=1;n.style.fontSize=fs+'px'}})}
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
 async function refresh(){if(busy){again=true;return}busy=true;try{await load()}catch(e){console.error(e);setTimeout(refresh,10000)}busy=false;if(again){again=false;refresh()}}
 let t;sb.channel('live').on('postgres_changes',{event:'*',schema:'public'},()=>{clearTimeout(t);t=setTimeout(refresh,400)}).subscribe();
