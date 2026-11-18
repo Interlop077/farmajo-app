@@ -72,6 +72,8 @@ test("screen1 and screen2 categories are explicitly forbidden",()=>{
 test("migration detaches shared legacy category links and is idempotent",()=>{
  const migration=readFileSync(new URL("../sql/screen3_shashlychnaya.sql",import.meta.url),"utf8").toLowerCase();
  assert.ok(migration.includes("delete from public.screen_categories s3"));
+ assert.ok(migration.includes("найдены общие категории screen3 и screen1/screen2 с блюдами"));
+ assert.ok(migration.indexOf("raise exception 'найдены общие категории") < migration.indexOf("delete from public.screen_categories s3"));
  assert.ok(migration.includes("legacy.screen_id in ('screen1','screen2')"));
  assert.ok(migration.includes("pg_advisory_xact_lock"));
  assert.ok(migration.includes("where screen_id='screen3' and category_id=v_category_id"));
