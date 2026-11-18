@@ -9,6 +9,7 @@ html,body{margin:0;height:100%;background:#0d0a08;overflow:hidden}
 .cu{text-shadow:none!important;background:var(--cu);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
 header{height:132px;display:flex;align-items:center;padding:0 64px}
 header img{width:104px;height:104px;border-radius:50%;box-shadow:0 0 0 3px #c98a5b,0 6px 22px rgba(0,0,0,.6)}
+.screen3-head img{width:72px;height:72px}
 header .t{margin-left:30px;font-family:Oswald,"Arial Narrow",sans-serif;font-weight:600;font-size:88px;letter-spacing:.02em;line-height:1;text-shadow:0 3px 10px rgba(0,0,0,.5)}
 header .s{margin-left:20px;font-family:Oswald,"Arial Narrow",sans-serif;font-weight:500;font-size:50px;color:var(--cream);padding-top:20px}
 main{display:grid;grid-template-columns:repeat(4,1fr);gap:0;padding:18px 64px 0}
@@ -42,19 +43,19 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;',
 async function load(){
  const r=await Promise.all([sb.from('screens').select('*').eq('id',ID).single(),sb.from('categories').select('*').order('sort'),sb.from('items').select('*').eq('active',true).order('sort'),sb.from('screen_categories').select('*').eq('screen_id',ID),sb.from('videos').select('*').eq('screen_id',ID).eq('active',true).order('sort'),sb.from('settings').select('*')]);
  for(const x of r)if(x.error)throw x.error;
- const vis={};let season='';r[3].data.forEach(x=>vis[x.category_id]=x.visible);r[5].data.forEach(x=>{if(x.key==='season')season=x.value});
- render(r[0].data,r[1].data.filter(c=>vis[c.id]&&(!c.season||c.season===season)),r[2].data,r[4].data.filter(v=>!v.season||v.season===season));
+ const vis={};let season='',screen3Logo='',screen3LogoEnabled=true;r[3].data.forEach(x=>vis[x.category_id]=x.visible);r[5].data.forEach(x=>{if(x.key==='season')season=x.value;if(x.key==='screen3_logo_url')screen3Logo=x.value;if(x.key==='screen3_logo_enabled')screen3LogoEnabled=x.value!=='false'});
+ render(r[0].data,r[1].data.filter(c=>vis[c.id]&&(!c.season||c.season===season)),r[2].data,r[4].data.filter(v=>!v.season||v.season===season),screen3Logo,screen3LogoEnabled);
 }
-function render(scr,cats,items,vids){
+function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled){
  const vid=!!scr.video_enabled,wide=!vid||scr.menu_width>=60,mw=wide?1920:Math.round(1920*scr.menu_width/100);
- const body=cats.map(c=>{const li=items.filter(i=>i.category_id===c.id).map(i=>`<li>${i.photo_url?`<img class="ph" src="${esc(i.photo_url)}" alt="">`:''}<span class="n">${esc(i.name)}</span>${i.volume_ml?`<span class="v">${i.volume_ml} мл</span>`:''}<span class="d"></span><span class="p cu">${+i.price}</span></li>`).join('');return li?`<section><h2 class="cu">${esc(c.name)}</h2><ul>${li}</ul></section>`:''}).join('');
- const title=cats.length&&cats.every(c=>c.season)?'Сезонное меню':'Меню';
- const head=wide?'<header><img src="logo.png" alt="FARMAJO"><div class="t cu">FARMAJO</div><div class="s">Меню</div></header>':`<div class="mt cu">${title}</div>`;
+ const body=cats.map(c=>{const li=items.filter(i=>i.category_id===c.id).map(i=>`<li>${i.photo_url?`<img class="ph" src="${esc(i.photo_url)}" alt="">`:''}<span class="n">${esc(i.name)}</span>${i.weight_g?`<span class="v">${i.weight_g} г</span>`:i.volume_ml?`<span class="v">${i.volume_ml} мл</span>`:''}<span class="d"></span><span class="p cu">${+i.price}</span></li>`).join('');return li?`<section><h2 class="cu">${esc(c.name)}</h2><ul>${li}</ul></section>`:''}).join('');
+ const title=scr.name;
+ const showLogo=ID!=='screen3'||screen3LogoEnabled;const logo=ID==='screen3'?(screen3Logo||'logo.png'):'logo.png';const head=wide?`<header class="${ID==='screen3'?'screen3-head':''}">${showLogo?`<img src="${esc(logo)}" alt="${esc(scr.name)}">`:''}<div class="t cu">${esc(scr.name)}</div></header>`:`<div class="mt cu">${esc(title)}</div>`;
  const m=document.getElementById('menu');m.className=wide?'':'narrow';m.style.width=mw+'px';m.innerHTML=head+'<main>'+body+'</main>';fit();
  const v=document.getElementById('video');v.style.display=vid&&!wide?'flex':'none';v.style.width=(1920-mw)+'px';
  const key=JSON.stringify([vid&&!wide,vids.map(x=>x.url)]);if(key===vkey)return;vkey=key;
  if(!(vid&&!wide))return;
- if(!vids.length){v.innerHTML='<img src="logo.png" alt="">';return}
+ if(!vids.length){v.innerHTML=showLogo?`<img src="${esc(logo)}" alt="${esc(scr.name)}">`:'';return}
  v.innerHTML='<video muted autoplay playsinline></video>';const el=v.firstChild;el.muted=true;let n=0;el.src=vids[0].url;el.loop=vids.length===1;
  el.onended=()=>{n=(n+1)%vids.length;el.src=vids[n].url;el.play()};el.play().catch(()=>{});
 }
