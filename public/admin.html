@@ -60,7 +60,7 @@ $('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
 async function act(d){const a=d.act;
  try{
  if(a==='out'){await sb.auth.signOut();return}
- if(a==='up'||a==='down'){const arr=d.t==='categories'?D.cats:d.t==='videos'?D.vids.filter(v=>v.screen_id===vsc):D.items.filter(i=>i.category_id===D.items.find(x=>x.id===d.id).category_id);
+ if(a==='up'||a==='down'){const arr=d.t==='categories'?D.cats.filter(c=>D.sct.some(x=>x.screen_id===menuScreen&&x.category_id===c.id)):d.t==='videos'?D.vids.filter(v=>v.screen_id===vsc):D.items.filter(i=>i.category_id===D.items.find(x=>x.id===d.id).category_id);
   const i=arr.findIndex(x=>x.id===d.id),j=a==='up'?i-1:i+1;if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];
   await Promise.all(arr.map((x,n)=>run(sb.from(d.t).update({sort:n}).eq('id',x.id),1)));toast('Сохранено')}
  else if(a==='addcat'){const n=prompt('Название категории для '+(D.screens.find(s=>s.id===menuScreen)||{}).name);if(!n)return;const r=await run(sb.from('categories').insert({name:n,sort:D.cats.filter(c=>D.sct.some(x=>x.screen_id===menuScreen&&x.category_id===c.id)).length}).select().single());await run(sb.from('screen_categories').insert({screen_id:menuScreen,category_id:r.data.id,visible:true}),1)}
