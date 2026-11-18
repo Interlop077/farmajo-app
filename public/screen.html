@@ -85,9 +85,33 @@ li{display:flex;align-items:baseline;height:33px;font-size:22px;font-weight:700;
 #stage.theme-luxury #menu.screen3 .dish-meta .p{min-width:0;font-size:25px}
 #stage.theme-luxury #menu.screen3.narrow .dish-photo{height:190px}
 #stage.theme-luxury #menu.screen3.narrow .dish-name{font-size:28px}
+
+/* Screen 3 luxury: denser responsive cards and automatic animated pages. */
+#menu.screen3.luxury-paged{position:relative}
+#menu.screen3.luxury-paged .menu-page{position:absolute;left:0;right:0;top:150px;bottom:26px;opacity:0;transform:translateX(34px);transition:opacity .7s ease,transform .7s ease;pointer-events:none}
+#menu.screen3.luxury-paged .menu-page.active{opacity:1;transform:translateX(0);pointer-events:auto}
+#menu.screen3.luxury-paged .menu-page main{height:100%;box-sizing:border-box;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:0;row-gap:10px;padding:8px 64px 0;align-content:start;overflow:hidden}
+#menu.screen3.luxury-paged .menu-page section{min-width:0;padding:0 18px;border-left:1px solid rgba(218,171,86,.35)}
+#menu.screen3.luxury-paged .menu-page section:nth-child(4n+1){border-left:0;padding-left:0}
+#menu.screen3.luxury-paged .menu-page section h2{font-size:38px;line-height:1.05;margin:2px 0 8px}
+#menu.screen3.luxury-paged .menu-page section ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:0}
+#menu.screen3.luxury-paged .dish-card{min-width:0}
+#menu.screen3.luxury-paged .dish-photo{height:104px}
+#menu.screen3.luxury-paged .dish-info{gap:5px;padding:7px 8px 8px}
+#menu.screen3.luxury-paged .dish-name{font-size:18px;line-height:1.08}
+#menu.screen3.luxury-paged .dish-meta .v{font-size:14px}
+#menu.screen3.luxury-paged .dish-meta .p{font-size:20px}
+#menu.screen3.narrow.luxury-paged .menu-page{top:92px}
+#menu.screen3.narrow.luxury-paged .menu-page main{grid-template-columns:repeat(2,minmax(0,1fr));padding:8px 28px 0}
+#menu.screen3.narrow.luxury-paged .menu-page section:nth-child(2n+1){border-left:0;padding-left:0}
+#menu.screen3.narrow.luxury-paged .menu-page section h2{font-size:34px}
+#menu.screen3.narrow.luxury-paged .dish-photo{height:116px}
+@media(prefers-reduced-motion:reduce){#menu.screen3.luxury-paged .menu-page{transition:none}}
+
 </style></head><body><div id="stage"><div id="menu"></div><div id="video"></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script><script src="config.js"></script><script>
 const sb=supabase.createClient(CFG.url,CFG.key),ID=new URLSearchParams(location.search).get('id')||'screen1';let vkey='',busy=false,again=false;
+let menuPageTimer=null,menuPageIndex=0;
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 async function load(){
  const r=await Promise.all([sb.from('screens').select('*').eq('id',ID).single(),sb.from('categories').select('*').order('sort'),sb.from('items').select('*').eq('active',true).order('sort'),sb.from('screen_categories').select('*').eq('screen_id',ID),sb.from('videos').select('*').eq('screen_id',ID).eq('active',true).order('sort'),sb.from('settings').select('*')]);
@@ -98,16 +122,33 @@ async function load(){
 function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled){
  const selectedTheme=(window.__menuTheme||'dark');document.getElementById('stage').classList.toggle('theme-light',selectedTheme==='light');document.getElementById('stage').classList.toggle('theme-luxury',selectedTheme==='luxury');
  const vid=!!scr.video_enabled,wide=!vid||scr.menu_width>=60,mw=wide?1920:Math.round(1920*scr.menu_width/100);
- const body=cats.map(c=>{const li=items.filter(i=>i.category_id===c.id).map(i=>{if(ID==='screen3'&&selectedTheme==='luxury')return `<li class="dish-card">${i.photo_url?`<img class="dish-photo" src="${esc(i.photo_url)}" alt="${esc(i.name)}">`:`<div class="dish-photo dish-placeholder" aria-hidden="true">FARMAJO</div>`}<div class="dish-info"><span class="n dish-name">${esc(i.name)}</span><div class="dish-meta">${i.weight_g?`<span class="v">${i.weight_g} г</span>`:i.volume_ml?`<span class="v">${i.volume_ml} мл</span>`:''}<span class="p cu">${+i.price}</span></div></div></li>`;return `<li>${i.photo_url?`<img class="ph" src="${esc(i.photo_url)}" alt="">`:''}<span class="n">${esc(i.name)}</span>${i.weight_g?`<span class="v">${i.weight_g} г</span>`:i.volume_ml?`<span class="v">${i.volume_ml} мл</span>`:''}<span class="d"></span><span class="p cu">${+i.price}</span></li>`}).join('');return li?`<section><h2 class="cu">${esc(c.name)}</h2><ul>${li}</ul></section>`:''}).join('');
+ const luxury3=ID==='screen3'&&selectedTheme==='luxury';
+ const dishCard=i=>\`<li class="dish-card">\${i.photo_url?\`<img class="dish-photo" src="\${esc(i.photo_url)}" alt="\${esc(i.name)}">\`:\`<div class="dish-photo dish-placeholder" aria-hidden="true">FARMAJO</div>\`}<div class="dish-info"><span class="n dish-name">\${esc(i.name)}</span><div class="dish-meta">\${i.weight_g?\`<span class="v">\${i.weight_g} г</span>\`:i.volume_ml?\`<span class="v">\${i.volume_ml} мл</span>\`:''}<span class="p cu">\${+i.price}</span></div></div></li>\`;
+ const normalDish=i=>\`<li>\${i.photo_url?\`<img class="ph" src="\${esc(i.photo_url)}" alt="">\`:''}<span class="n">\${esc(i.name)}</span>\${i.weight_g?\`<span class="v">\${i.weight_g} г</span>\`:i.volume_ml?\`<span class="v">\${i.volume_ml} мл</span>\`:''}<span class="d"></span><span class="p cu">\${+i.price}</span></li>\`;
+ let body='';
+ if(luxury3){
+  const chunks=[];
+  cats.forEach(c=>{const list=items.filter(i=>i.category_id===c.id);for(let j=0;j<list.length;j+=8)chunks.push({category:c,items:list.slice(j,j+8)})});
+  const pages=[];for(let j=0;j<chunks.length;j+=4)pages.push(chunks.slice(j,j+4));
+  body=pages.map((page,index)=>\`<div class="menu-page\${index===0?' active':''}" data-page="\${index}"><main>\${page.map(part=>\`<section><h2 class="cu">\${esc(part.category.name)}</h2><ul>\${part.items.map(dishCard).join('')}</ul></section>\`).join('')}</main></div>\`).join('');
+ }else{
+  body=cats.map(c=>{const li=items.filter(i=>i.category_id===c.id).map(normalDish).join('');return li?\`<section><h2 class="cu">\${esc(c.name)}</h2><ul>\${li}</ul></section>\`:''}).join('');
+ }
  const title=scr.name;
  const showLogo=ID!=='screen3'||screen3LogoEnabled;const logo=ID==='screen3'?(screen3Logo||'logo.png'):'logo.png';const head=wide?`<header class="${ID==='screen3'?'screen3-head':''}">${showLogo?`<img src="${esc(logo)}" alt="${esc(scr.name)}">`:''}<div class="t cu">${esc(scr.name)}</div></header>`:`<div class="mt cu">${esc(title)}</div>`;
- const m=document.getElementById('menu');m.className=(ID==='screen3'?'screen3 ':'')+(wide?'':'narrow');m.style.width=mw+'px';m.innerHTML=head+'<main>'+body+'</main>';fit();
+ const m=document.getElementById('menu');m.className=(ID==='screen3'?'screen3 ':'')+(wide?'':'narrow');m.style.width=mw+'px';m.innerHTML=head+(luxury3?body:'<main>'+body+'</main>');if(luxury3)startMenuPaging();else{m.classList.remove('luxury-paged');stopMenuPaging()}fit();
  const v=document.getElementById('video');v.style.display=vid&&!wide?'flex':'none';v.style.width=(1920-mw)+'px';
  const key=JSON.stringify([vid&&!wide,vids.map(x=>x.url)]);if(key===vkey)return;vkey=key;
  if(!(vid&&!wide))return;
  if(!vids.length){v.innerHTML=showLogo?`<img src="${esc(logo)}" alt="${esc(scr.name)}">`:'';return}
  v.innerHTML='<video muted autoplay playsinline></video>';const el=v.firstChild;el.muted=true;let n=0;el.src=vids[0].url;el.loop=vids.length===1;
  el.onended=()=>{n=(n+1)%vids.length;el.src=vids[n].url;el.play()};el.play().catch(()=>{});
+}
+function stopMenuPaging(){if(menuPageTimer){clearInterval(menuPageTimer);menuPageTimer=null}menuPageIndex=0;}
+function startMenuPaging(){
+ stopMenuPaging();const menu=document.getElementById('menu');menu.classList.add('luxury-paged');
+ const pages=[...menu.querySelectorAll('.menu-page')];if(pages.length<2)return;
+ menuPageIndex=0;menuPageTimer=setInterval(()=>{const current=pages[menuPageIndex];if(!current)return;current.classList.remove('active');menuPageIndex=(menuPageIndex+1)%pages.length;pages[menuPageIndex].classList.add('active')},9000);
 }
 function fit(){document.querySelectorAll('#menu li').forEach(li=>{const n=li.querySelector('.n');if(!n)return;n.style.fontSize='';let fs=parseFloat(getComputedStyle(n).fontSize);while(li.scrollWidth>li.clientWidth+1&&fs>14){fs-=1;n.style.fontSize=fs+'px'}})}
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
