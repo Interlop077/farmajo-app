@@ -143,7 +143,10 @@ li{display:flex;align-items:baseline;height:33px;font-size:22px;font-weight:700;
 #stage.screen3-stage{background:#080706 url('screen3-bg.svg') center center / cover no-repeat}
 #stage.screen3-stage::after{content:none}
 #stage.screen3-bg{background:linear-gradient(180deg,rgba(0,0,0,.48),rgba(0,0,0,.18) 45%,rgba(0,0,0,.35)),url('/magnific_glowing-redorange-hot-charcoal-embers_lJt7tzogv9.jpg') center center / cover no-repeat}
-#stage.screen3-bg::before{opacity:.10}
+
+/* Исправление: новый фон без старого шума и старых анимированных углей */
+#stage.screen3-bg::before{content:none!important;display:none!important}
+#stage.screen3-bg #embers{display:none!important}
 </style></head><body><div id="stage"><canvas id="embers" aria-hidden="true"></canvas><div id="menu"></div><div id="video"></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script><script src="config.js"></script><script>
 const sb=supabase.createClient(CFG.url,CFG.key),ID=new URLSearchParams(location.search).get('id')||'screen1';let vkey='',busy=false,again=false;
@@ -161,7 +164,10 @@ function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled){
  document.getElementById('stage').classList.toggle('theme-light',selectedTheme==='light');
  document.getElementById('stage').classList.toggle('theme-luxury',selectedTheme==='luxury');
  document.getElementById('stage').classList.toggle('screen3-stage',ID==='screen3'&&selectedTheme==='luxury');
- if(ID==='screen3'&&selectedTheme==='luxury')startEmbers();else stopEmbers();
+
+ // Для экрана 3 используется готовый фон Magnific — старую анимацию углей не запускаем.
+ stopEmbers();
+
  const vid=!!scr.video_enabled,wide=!vid||scr.menu_width>=60,mw=wide?1920:Math.round(1920*scr.menu_width/100);
  const luxury3=ID==='screen3'&&selectedTheme==='luxury';
  const dishCard=i=>`<li class="dish-card">${i.photo_url?`<img class="dish-photo" src="${esc(i.photo_url)}" alt="${esc(i.name)}">`:`<div class="dish-photo dish-placeholder" aria-hidden="true">FARMAJO</div>`}<div class="dish-info"><span class="n dish-name">${esc(i.name)}</span><div class="dish-meta">${i.weight_g?`<span class="v">${i.weight_g} г</span>`:i.volume_ml?`<span class="v">${i.volume_ml} мл</span>`:''}<span class="p cu">${+i.price}</span></div></div></li>`;
