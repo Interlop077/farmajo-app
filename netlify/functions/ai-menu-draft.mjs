@@ -6,7 +6,7 @@ async function authUser(event){
   if(!token||!url||!key)throw new Error("Требуется авторизация Supabase и серверная конфигурация");
   const r=await fetch(url+"/auth/v1/user",{headers:{apikey:key,Authorization:"Bearer "+token}});
   if(!r.ok)throw new Error("Сессия недействительна");
-  return {token,url,key};
+  return {token,url,key,user:await r.json()};
 }
 async function dbGet(ctx,path){
   const r=await fetch(ctx.url+"/rest/v1/"+path,{headers:{apikey:ctx.key,Authorization:"Bearer "+ctx.token}});
@@ -30,7 +30,7 @@ export async function handler(event){
     if(!prompt||prompt.length>2000)return json(400,{error:"Запрос должен содержать от 1 до 2000 символов"});
     // Safe default: no API calls, no writes, no demo data inserted.
     if((process.env.AI_MODE||"mock")!=="openai")return json(200,{mode:"mock",summary:"Тестовый режим активен. Платные запросы не выполнялись. Предварительный просмотр проверен; реальных изменений пока нет.",operations:[]});
-    const links=await dbGet(ctx,"screen_categories?select=screen_id,category_id");
+    const allowedUsers=(process.env.AI_ALLOWED_USER_IDS||"").split(",").map(x=>x.trim()).filter(Boolean);\n    if(!allowedUsers.includes(ctx.user.id))return json(403,{error:"AI-доступ не разрешён для этой учётной записи. Настройте AI_ALLOWED_USER_IDS в Netlify."});\n    const links=await dbGet(ctx,"screen_categories?select=screen_id,category_id");
     const screen3Ids=links.filter(x=>x.screen_id==="screen3").map(x=>String(x.category_id));
     const legacyIds=new Set(links.filter(x=>x.screen_id==="screen1"||x.screen_id==="screen2").map(x=>String(x.category_id)));
     const allowedIds=screen3Ids.filter(id=>!legacyIds.has(id));
@@ -57,5 +57,5 @@ export async function handler(event){
       if(op.type==="create_item"&&op.id!==null)return json(502,{error:"Некорректный черновик новой позиции"});
     }
     return json(200,{mode:"openai",summary:result.summary,operations:result.operations});
-  }catch(e){return json(401,{error:e.message||"Ошибка авторизации"});}
+  }catch(e){return json(500,{error:e.message||"Ошибка подготовки черновика"});}
 }
