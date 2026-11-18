@@ -57,7 +57,6 @@ app.addEventListener('change',async e=>{const el=e.target,d=el.dataset;
  if(d.logoEnabled){await run(sb.from('settings').upsert({key:'screen3_logo_enabled',value:el.checked?'true':'false'},{onConflict:'key'}));await load();return}
  if(d.menuScreen){menuScreen=el.value;draw();return}
  if(d.sc){const [s,c]=d.sc.split('|');await run(sb.from('screen_categories').upsert({screen_id:s,category_id:c,visible:el.checked},{onConflict:'screen_id,category_id'}));await load();return}
- if(d.theme){await run(sb.from('settings').upsert({key:'menu_theme',value:el.value},{onConflict:'key'}));await load();return}
  if(d.season){await run(sb.from('settings').upsert({key:'season',value:el.value}));await load();return}
  if(d.vsc){vsc=el.value;draw();return}
  if(d.t){let v=el.type==='checkbox'?el.checked:el.value;if(el.type==='number')v=v===''?null:Number(v);else if(d.nul&&v==='')v=null;
