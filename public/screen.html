@@ -32,6 +32,15 @@ li{display:flex;align-items:baseline;height:33px;font-size:22px;font-weight:700;
 #menu.narrow{padding:28px 44px 0;border-right:1px solid rgba(201,138,91,.45)}
 #menu.narrow main{column-count:1;padding:0}
 #menu.narrow li{height:36px;font-size:24px}#menu.narrow h2{font-size:48px}
+/* Screen 3: keep each category and its dishes together in a stable grid.
+   Multi-column flow can balance content in a way that visually separates a
+   category heading from its final dish on the guest display. */
+#menu.screen3 main{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-count:initial;column-gap:0;column-rule:0;row-gap:8px;align-content:start}
+#menu.screen3 section{break-inside:auto;min-width:0;margin:0;padding:0 28px;border-left:1px solid rgba(201,138,91,.45)}
+#menu.screen3 section:nth-child(4n+1){border-left:0;padding-left:0}
+#menu.screen3 section h2{break-after:auto}
+#menu.screen3.narrow main{grid-template-columns:minmax(0,1fr);padding:0}
+#menu.screen3.narrow section{border-left:0;padding:0}
 .mt{font-family:Oswald,"Arial Narrow",sans-serif;font-weight:600;font-size:60px;line-height:1.1;margin-bottom:10px}
 .ph{width:28px;height:28px;border-radius:50%;object-fit:cover;margin-right:10px;align-self:center;flex:none}
 #video{height:1080px;flex:none;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25)}
@@ -51,7 +60,7 @@ function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled){
  const body=cats.map(c=>{const li=items.filter(i=>i.category_id===c.id).map(i=>`<li>${i.photo_url?`<img class="ph" src="${esc(i.photo_url)}" alt="">`:''}<span class="n">${esc(i.name)}</span>${i.weight_g?`<span class="v">${i.weight_g} г</span>`:i.volume_ml?`<span class="v">${i.volume_ml} мл</span>`:''}<span class="d"></span><span class="p cu">${+i.price}</span></li>`).join('');return li?`<section><h2 class="cu">${esc(c.name)}</h2><ul>${li}</ul></section>`:''}).join('');
  const title=scr.name;
  const showLogo=ID!=='screen3'||screen3LogoEnabled;const logo=ID==='screen3'?(screen3Logo||'logo.png'):'logo.png';const head=wide?`<header class="${ID==='screen3'?'screen3-head':''}">${showLogo?`<img src="${esc(logo)}" alt="${esc(scr.name)}">`:''}<div class="t cu">${esc(scr.name)}</div></header>`:`<div class="mt cu">${esc(title)}</div>`;
- const m=document.getElementById('menu');m.className=wide?'':'narrow';m.style.width=mw+'px';m.innerHTML=head+'<main>'+body+'</main>';fit();
+ const m=document.getElementById('menu');m.className=(ID==='screen3'?'screen3 ':'')+(wide?'':'narrow');m.style.width=mw+'px';m.innerHTML=head+'<main>'+body+'</main>';fit();
  const v=document.getElementById('video');v.style.display=vid&&!wide?'flex':'none';v.style.width=(1920-mw)+'px';
  const key=JSON.stringify([vid&&!wide,vids.map(x=>x.url)]);if(key===vkey)return;vkey=key;
  if(!(vid&&!wide))return;
