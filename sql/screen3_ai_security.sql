@@ -66,6 +66,9 @@ declare
   v_sort integer;
 begin
   if auth.uid() is null then raise exception 'authentication required' using errcode='28000'; end if;
+  if coalesce(auth.jwt()->'app_metadata'->>'role','') <> 'admin' then
+    raise exception 'FARMAJO admin role required' using errcode='42501';
+  end if;
   select * into d from public.ai_menu_drafts where id=p_draft_id for update;
   if not found then raise exception 'draft not found' using errcode='P0002'; end if;
   if d.user_id <> auth.uid() then raise exception 'draft owner mismatch' using errcode='42501'; end if;
