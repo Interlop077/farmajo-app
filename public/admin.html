@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>FARMAJO — Админ</title>
 <style>
 :root{color-scheme:dark}body{margin:0;background:#141210;color:#f1e8dc;font:16px -apple-system,"Segoe UI",Arial,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
-#login[hidden]{display:none}#login{max-width:340px;margin:12vh auto;display:grid;gap:12px;padding:0 16px}h1{color:#d19463;margin:0}
+#login[hidden],#reset[hidden]{display:none}#login,#reset{max-width:340px;margin:12vh auto;display:grid;gap:12px;padding:0 16px}h1{color:#d19463;margin:0}
 input,select,button{font:inherit;font-size:16px;color:inherit;background:#26211d;border:1px solid #4a3f36;border-radius:10px;padding:10px;min-width:0}
 button{cursor:pointer;background:#3a2e25}#go{background:#c98a5b;color:#1a120c;font-weight:700}
 nav{position:sticky;top:0;display:flex;gap:6px;padding:10px;background:#141210;z-index:2;overflow-x:auto}nav .on{background:#c98a5b;color:#1a120c;font-weight:700}
@@ -12,7 +12,8 @@ nav{position:sticky;top:0;display:flex;gap:6px;padding:10px;background:#141210;z
 .row .add{width:auto;flex:1}video{width:120px;border-radius:8px}.chk{display:block;padding:8px 0}.mut{color:#8d8a84}
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#2e5b3a;padding:10px 18px;border-radius:20px;opacity:0;transition:.2s;pointer-events:none}#toast.bad{background:#7a2e2e}#toast.show{opacity:1}
 </style></head><body>
-<div id="login" hidden><h1>FARMAJO</h1><input id="em" type="email" placeholder="E-mail" autocomplete="username"><input id="pw" type="password" placeholder="Пароль" autocomplete="current-password"><button id="go">Войти</button><div id="le" class="mut"></div></div>
+<div id="login" hidden><h1>FARMAJO</h1><input id="em" type="email" placeholder="E-mail" autocomplete="username"><input id="pw" type="password" placeholder="Пароль" autocomplete="current-password"><button id="go">Войти</button><button id="forgot" type="button">Забыли пароль?</button><div id="le" class="mut"></div></div>
+<div id="reset" hidden><h1>Новый пароль</h1><input id="newpw" type="password" placeholder="Новый пароль" autocomplete="new-password"><button id="savepw">Сохранить пароль</button><div id="re" class="mut"></div></div>
 <div id="main" hidden><nav><button data-tab="menu">Меню</button><button data-tab="screens">Экраны</button><button data-tab="videos">Видео</button><button data-act="out">Выйти</button></nav><div id="app"></div></div><div id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script><script src="config.js"></script>
 <script>
@@ -64,7 +65,11 @@ async function act(d){const a=d.act;
  else if(a==='additem'){await run(sb.from('items').insert({category_id:d.id,name:'Новая позиция',price:0,sort:D.items.filter(i=>i.category_id===d.id).length}))}
  else if(a==='delcat'||a==='delitem'||a==='delvid'){if(!confirm('Удалить? Это нельзя отменить.'))return;await run(sb.from({delcat:'categories',delitem:'items',delvid:'videos'}[a]).delete().eq('id',d.id))}
  await load()}catch(x){console.error(x)}}
-function show(on){$('#login').hidden=on;$('#main').hidden=!on;if(on&&!isOn)load();isOn=on}
+function show(on){$('#login').hidden=!on;$('#reset').hidden=true;$('#main').hidden=!on;if(on&&!isOn)load();isOn=on}
+function showReset(){$('#login').hidden=true;$('#main').hidden=true;$('#reset').hidden=false}
 $('#go').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('#em').value.trim(),password:$('#pw').value});$('#le').textContent=error?'Неверный e-mail или пароль':''};
-sb.auth.getSession().then(({data})=>{show(!!data.session);sb.auth.onAuthStateChange((_,s)=>show(!!s))});
+$('#forgot').onclick=async()=>{const email=$('#em').value.trim();if(!email){$('#le').textContent='Введите e-mail, затем нажмите ещё раз';return}const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});$('#le').textContent=error?'Ошибка: '+error.message:'Проверьте почту: мы отправили ссылку для нового пароля'};
+$('#savepw').onclick=async()=>{const password=$('#newpw').value;if(password.length<8){$('#re').textContent='Пароль должен содержать минимум 8 символов';return}const {error}=await sb.auth.updateUser({password});if(error){$('#re').textContent='Ошибка: '+error.message;return}$('#re').textContent='Пароль сохранён. Открываем админ-панель…';history.replaceState({},document.title,location.pathname);setTimeout(()=>show(true),700)};
+sb.auth.onAuthStateChange((event,s)=>{if(event==='PASSWORD_RECOVERY'){showReset();return}show(!!s)});
+sb.auth.getSession().then(({data})=>show(!!data.session));
 </script></body></html>
