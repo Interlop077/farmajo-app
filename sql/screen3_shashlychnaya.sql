@@ -58,10 +58,16 @@ begin
       returning id into v_category_id;
     end if;
 
-    insert into public.screen_categories (screen_id, category_id, visible, sort)
-    values ('screen3', v_category_id, true, v_sort)
-    on conflict (screen_id, category_id)
-    do update set sort = excluded.sort;
+    if exists (
+      select 1 from public.screen_categories
+      where screen_id='screen3' and category_id=v_category_id
+    ) then
+      update public.screen_categories set sort=v_sort
+      where screen_id='screen3' and category_id=v_category_id;
+    else
+      insert into public.screen_categories (screen_id, category_id, visible, sort)
+      values ('screen3', v_category_id, true, v_sort);
+    end if;
   end loop;
 end
 $migration$;

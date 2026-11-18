@@ -9,7 +9,7 @@ async function context(event){
   if(!r.ok)throw new Error("Сессия недействительна");
   return {url,headers,user:await r.json(),serviceKey};
 }
-async function db(ctx,path){const r=await fetch(ctx.url+"/rest/v1/"+path,{headers:ctx.headers});if(!r.ok)throw new Error("Не удалось прочитать меню шашлычной");return r.json();}
+async function db(ctx,path){if(!ctx.serviceKey)throw new Error("На сервере не задан SUPABASE_SERVICE_ROLE_KEY");const headers={apikey:ctx.serviceKey,Authorization:"Bearer "+ctx.serviceKey};const r=await fetch(ctx.url+"/rest/v1/"+path,{headers});if(!r.ok)throw new Error("Не удалось прочитать меню шашлычной");return r.json();}
 async function rpc(ctx,name,body){if(!ctx.serviceKey)throw new Error("На сервере не задан SUPABASE_SERVICE_ROLE_KEY; черновик не создан");const r=await fetch(ctx.url+"/rest/v1/rpc/"+name,{method:"POST",headers:{apikey:ctx.serviceKey,Authorization:"Bearer "+ctx.serviceKey,"Content-Type":"application/json"},body:JSON.stringify(body)});const data=await r.json().catch(()=>null);if(!r.ok)throw new Error(data?.message||"Не удалось сохранить серверный черновик");return data;}
 export async function handler(event){
   if(event.httpMethod!=="POST")return json(405,{error:"Method not allowed"});
