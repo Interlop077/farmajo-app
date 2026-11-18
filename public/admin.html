@@ -65,7 +65,7 @@ async function act(d){const a=d.act;
  else if(a==='additem'){await run(sb.from('items').insert({category_id:d.id,name:'Новая позиция',price:0,sort:D.items.filter(i=>i.category_id===d.id).length}))}
  else if(a==='delcat'||a==='delitem'||a==='delvid'){if(!confirm('Удалить? Это нельзя отменить.'))return;await run(sb.from({delcat:'categories',delitem:'items',delvid:'videos'}[a]).delete().eq('id',d.id))}
  await load()}catch(x){console.error(x)}}
-function show(on){$('#login').hidden=!on;$('#reset').hidden=true;$('#main').hidden=!on;if(on&&!isOn)load();isOn=on}
+function show(on){$('#login').hidden=on;$('#reset').hidden=true;$('#main').hidden=!on;if(on&&!isOn)load();isOn=on}
 function showReset(){$('#login').hidden=true;$('#main').hidden=true;$('#reset').hidden=false}
 $('#go').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('#em').value.trim(),password:$('#pw').value});$('#le').textContent=error?'Неверный e-mail или пароль':''};
 $('#forgot').onclick=async()=>{const email=$('#em').value.trim();if(!email){$('#le').textContent='Введите e-mail, затем нажмите ещё раз';return}const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});$('#le').textContent=error?'Ошибка: '+error.message:'Проверьте почту: мы отправили ссылку для нового пароля'};
