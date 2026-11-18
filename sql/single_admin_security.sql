@@ -29,37 +29,44 @@ grant insert, update, delete
   to authenticated;
 
 -- 2) Replace broad authenticated write policies with trusted app_metadata role checks.
+
 drop policy if exists "write categories" on public.categories;
+drop policy if exists "admin write categories" on public.categories;
 create policy "admin write categories"
   on public.categories for all to authenticated
   using ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin')
   with check ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin');
 
 drop policy if exists "write items" on public.items;
+drop policy if exists "admin write items" on public.items;
 create policy "admin write items"
   on public.items for all to authenticated
   using ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin')
   with check ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin');
 
 drop policy if exists "write screens" on public.screens;
+drop policy if exists "admin write screens" on public.screens;
 create policy "admin write screens"
   on public.screens for all to authenticated
   using ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin')
   with check ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin');
 
 drop policy if exists "write screen_categories" on public.screen_categories;
+drop policy if exists "admin write screen_categories" on public.screen_categories;
 create policy "admin write screen_categories"
   on public.screen_categories for all to authenticated
   using ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin')
   with check ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin');
 
 drop policy if exists "write videos" on public.videos;
+drop policy if exists "admin write videos" on public.videos;
 create policy "admin write videos"
   on public.videos for all to authenticated
   using ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin')
   with check ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin');
 
 drop policy if exists "write settings" on public.settings;
+drop policy if exists "admin write settings" on public.settings;
 create policy "admin write settings"
   on public.settings for all to authenticated
   using ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin')
@@ -73,6 +80,7 @@ grant select on table storage.objects to anon, authenticated;
 grant insert, update, delete on table storage.objects to authenticated;
 
 drop policy if exists "media write" on storage.objects;
+drop policy if exists "media admin write" on storage.objects;
 create policy "media admin write"
   on storage.objects for all to authenticated
   using (
