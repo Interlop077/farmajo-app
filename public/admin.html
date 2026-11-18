@@ -108,7 +108,15 @@ async function finishDrag(e){
  }
 }
 app.addEventListener('pointerup',finishDrag);
-app.addEventListener('pointercancel',finishDrag);
+app.addEventListener('pointercancel',e=>{
+ if(!dragState||e.pointerId!==dragState.pointerId)return;
+ const state=dragState;dragState=null;state.row.classList.remove('dragging');
+ const parent=state.row.parentElement;
+ const rows=[...parent.querySelectorAll('.item[data-sort-item="1"]')];
+ const original=D.items.filter(i=>i.category_id===state.categoryId).sort((a,b)=>(a.sort??0)-(b.sort??0));
+ const addButton=parent.querySelector('.add');
+ for(const item of original){const row=rows.find(x=>x.dataset.id===item.id);if(row)parent.insertBefore(row,addButton||null)}
+});
 
 app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;try{if(b.dataset.act)await act(b.dataset);else if(b.dataset.aiGenerate)await makeAIDraft();else if(b.dataset.aiApply)await applyAIDraft();else if(b.dataset.aiClear){aiDraft=null;draw()}}catch(x){console.error(x);toast('Ошибка: '+x.message,1)}});
 $('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.tab){tab=b.dataset.tab;draw()}else if(b.dataset.act)act(b.dataset)});
