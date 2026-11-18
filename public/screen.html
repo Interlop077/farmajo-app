@@ -123,16 +123,16 @@ function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled){
  const selectedTheme=(window.__menuTheme||'dark');document.getElementById('stage').classList.toggle('theme-light',selectedTheme==='light');document.getElementById('stage').classList.toggle('theme-luxury',selectedTheme==='luxury');
  const vid=!!scr.video_enabled,wide=!vid||scr.menu_width>=60,mw=wide?1920:Math.round(1920*scr.menu_width/100);
  const luxury3=ID==='screen3'&&selectedTheme==='luxury';
- const dishCard=i=>\`<li class="dish-card">\${i.photo_url?\`<img class="dish-photo" src="\${esc(i.photo_url)}" alt="\${esc(i.name)}">\`:\`<div class="dish-photo dish-placeholder" aria-hidden="true">FARMAJO</div>\`}<div class="dish-info"><span class="n dish-name">\${esc(i.name)}</span><div class="dish-meta">\${i.weight_g?\`<span class="v">\${i.weight_g} г</span>\`:i.volume_ml?\`<span class="v">\${i.volume_ml} мл</span>\`:''}<span class="p cu">\${+i.price}</span></div></div></li>\`;
- const normalDish=i=>\`<li>\${i.photo_url?\`<img class="ph" src="\${esc(i.photo_url)}" alt="">\`:''}<span class="n">\${esc(i.name)}</span>\${i.weight_g?\`<span class="v">\${i.weight_g} г</span>\`:i.volume_ml?\`<span class="v">\${i.volume_ml} мл</span>\`:''}<span class="d"></span><span class="p cu">\${+i.price}</span></li>\`;
+ const dishCard=i=>`<li class="dish-card">${i.photo_url?`<img class="dish-photo" src="${esc(i.photo_url)}" alt="${esc(i.name)}">`:`<div class="dish-photo dish-placeholder" aria-hidden="true">FARMAJO</div>`}<div class="dish-info"><span class="n dish-name">${esc(i.name)}</span><div class="dish-meta">${i.weight_g?`<span class="v">${i.weight_g} г</span>`:i.volume_ml?`<span class="v">${i.volume_ml} мл</span>`:''}<span class="p cu">${+i.price}</span></div></div></li>`;
+ const normalDish=i=>`<li>${i.photo_url?`<img class="ph" src="${esc(i.photo_url)}" alt="">`:''}<span class="n">${esc(i.name)}</span>${i.weight_g?`<span class="v">${i.weight_g} г</span>`:i.volume_ml?`<span class="v">${i.volume_ml} мл</span>`:''}<span class="d"></span><span class="p cu">${+i.price}</span></li>`;
  let body='';
  if(luxury3){
   const chunks=[];
   cats.forEach(c=>{const list=items.filter(i=>i.category_id===c.id);for(let j=0;j<list.length;j+=8)chunks.push({category:c,items:list.slice(j,j+8)})});
   const pages=[];for(let j=0;j<chunks.length;j+=4)pages.push(chunks.slice(j,j+4));
-  body=pages.map((page,index)=>\`<div class="menu-page\${index===0?' active':''}" data-page="\${index}"><main>\${page.map(part=>\`<section><h2 class="cu">\${esc(part.category.name)}</h2><ul>\${part.items.map(dishCard).join('')}</ul></section>\`).join('')}</main></div>\`).join('');
+  body=pages.map((page,index)=>`<div class="menu-page${index===0?' active':''}" data-page="${index}"><main>${page.map(part=>`<section><h2 class="cu">${esc(part.category.name)}</h2><ul>${part.items.map(dishCard).join('')}</ul></section>`).join('')}</main></div>`).join('');
  }else{
-  body=cats.map(c=>{const li=items.filter(i=>i.category_id===c.id).map(normalDish).join('');return li?\`<section><h2 class="cu">\${esc(c.name)}</h2><ul>\${li}</ul></section>\`:''}).join('');
+  body=cats.map(c=>{const li=items.filter(i=>i.category_id===c.id).map(normalDish).join('');return li?`<section><h2 class="cu">${esc(c.name)}</h2><ul>${li}</ul></section>`:''}).join('');
  }
  const title=scr.name;
  const showLogo=ID!=='screen3'||screen3LogoEnabled;const logo=ID==='screen3'?(screen3Logo||'logo.png'):'logo.png';const head=wide?`<header class="${ID==='screen3'?'screen3-head':''}">${showLogo?`<img src="${esc(logo)}" alt="${esc(scr.name)}">`:''}<div class="t cu">${esc(scr.name)}</div></header>`:`<div class="mt cu">${esc(title)}</div>`;
