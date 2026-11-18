@@ -63,7 +63,7 @@ test("migration detaches shared legacy category links and is idempotent",()=>{
  assert.ok(migration.includes("delete from public.screen_categories s3"));
  assert.ok(migration.includes("legacy.screen_id in ('screen1','screen2')"));
  assert.ok(migration.includes("pg_advisory_xact_lock"));
- assert.ok(migration.includes("on conflict (screen_id, category_id)"));
+ assert.ok(migration.includes("where screen_id='screen3' and category_id=v_category_id"));
  assert.ok(migration.includes("public.categories.id%type"));
 });
 test("one bad operation aborts the single PostgreSQL RPC transaction",()=>{
