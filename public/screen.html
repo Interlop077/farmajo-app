@@ -1139,6 +1139,11 @@ li{
   #stage.screen3-stage.screen3-bg > #atmosphere:after{animation:none;}
 }
 
+/* При ровно 7 карточках: последняя занимает центральную колонку нижнего ряда */
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:nth-child(7):last-child{
+  grid-column:2;
+}
+
 </style>
 </head>
 
