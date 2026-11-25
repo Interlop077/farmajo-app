@@ -211,10 +211,59 @@ body{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
   }
 }
 
+
+/* Responsive mobile navigation: keep bottom tabs primary, expose full sidebar in a drawer */
+.mobile-menu-toggle{display:none;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#edf4ff;border-radius:11px;width:38px;height:36px;font-size:19px;line-height:1;align-items:center;justify-content:center}
+.mobile-menu-backdrop{display:none}
+@media(max-width:620px){
+  .top{display:flex;justify-content:flex-start;gap:11px}
+  .mobile-menu-toggle{display:flex;flex:0 0 38px}
+  .brand{flex:1;min-width:0}
+  .top .actions{margin-left:auto}
+  aside.left{
+    display:block !important;
+    position:fixed !important;
+    top:52px !important;
+    left:0 !important;
+    bottom:0 !important;
+    width:min(82vw,310px) !important;
+    max-width:310px !important;
+    overflow-y:auto !important;
+    padding:18px 14px calc(28px + env(safe-area-inset-bottom)) !important;
+    background:rgba(15,23,39,.96) !important;
+    border:0 !important;
+    border-right:1px solid rgba(255,255,255,.18) !important;
+    border-radius:0 22px 0 0 !important;
+    box-shadow:18px 0 50px rgba(0,0,0,.42) !important;
+    backdrop-filter:blur(30px) saturate(170%) !important;
+    -webkit-backdrop-filter:blur(30px) saturate(170%) !important;
+    transform:translateX(-110%);
+    transition:transform .24s ease;
+    z-index:10001 !important;
+  }
+  body.mobile-menu-open aside.left{transform:translateX(0)}
+  .mobile-menu-backdrop{
+    display:block;
+    position:fixed;
+    inset:52px 0 0;
+    background:rgba(2,6,14,.52);
+    opacity:0;
+    visibility:hidden;
+    transition:opacity .2s ease,visibility .2s ease;
+    z-index:10000;
+  }
+  body.mobile-menu-open .mobile-menu-backdrop{opacity:1;visibility:visible}
+  body.mobile-menu-open{overflow:hidden}
+}
+@media(prefers-reduced-motion:reduce){
+  aside.left,.mobile-menu-backdrop{transition:none}
+}
+
 </style>
 </head>
 <body>
-<header class="top"><div class="brand">MENU<span>BUILDER</span> <span class="pill">ПРОТОТИП</span></div><div class="actions"><button class="btn" id="save">Сохранить черновик</button><button class="btn primary" id="publish">Опубликовать</button></div></header>
+<header class="top"><button class="mobile-menu-toggle" id="menuToggle" type="button" aria-label="Открыть меню" aria-expanded="false">☰</button><div class="brand">MENU<span>BUILDER</span> <span class="pill">ПРОТОТИП</span></div><div class="actions"><button class="btn" id="save">Сохранить черновик</button><button class="btn primary" id="publish">Опубликовать</button></div></header>
+<div class="mobile-menu-backdrop" id="menuBackdrop"></div>
 <nav class="mobile-tabs" aria-label="Быстрая навигация"><button class="dock-item active" data-target="preview"><span>▣</span><small>Просмотр</small></button><button class="dock-item" data-target="templates"><span>✧</span><small>Шаблоны</small></button><button class="dock-item" data-target="controls"><span>☷</span><small>Настройки</small></button></nav>
 <div class="layout">
 <aside class="left"><div class="eyebrow">КОНСТРУКТОР</div><div class="nav active"><b>▦</b> Шаблоны</div><div class="nav"><b>▤</b> Экраны</div><div class="nav"><b>☷</b> Категории и блюда</div><div class="nav"><b>✦</b> Оформление</div><div class="nav"><b>▦</b> Расположение</div><div class="nav"><b>文</b> Языки</div><div class="eyebrow">ПУБЛИКАЦИЯ</div><div class="nav"><b>◉</b> Предпросмотр</div><div class="nav"><b>↻</b> История версий</div><div class="note">Это отдельный демонстрационный прототип. Он не подключён к данным FARMAJO и не изменяет действующее меню.</div></aside>
@@ -237,6 +286,15 @@ $("#dishGrid").addEventListener("pointerdown",e=>{const handle=e.target.closest(
 document.addEventListener("pointermove",e=>{if(!draggedCard||e.pointerId!==dragPointer)return;const over=document.elementFromPoint(e.clientX,e.clientY)?.closest("#dishGrid .dish");if(!over||over===draggedCard)return;const r=over.getBoundingClientRect();const after=e.clientY>r.top+r.height/2;over.parentNode.insertBefore(draggedCard,after?over.nextSibling:over);});
 document.addEventListener("pointerup",e=>{if(!draggedCard||e.pointerId!==dragPointer)return;draggedCard.classList.remove("dragging");const ids=[...$("#dishGrid").children].map(el=>Number(el.dataset.dishId));const byId=new Map(orderedDishes.map(item=>[item.id,item]));const reordered=ids.map(id=>byId.get(id)).filter(Boolean);const shown=new Set(ids);orderedDishes=[...reordered,...orderedDishes.filter(item=>!shown.has(item.id))];draggedCard=null;dragPointer=null;});
 document.addEventListener("pointercancel",()=>{if(draggedCard){draggedCard.classList.remove("dragging");render();}draggedCard=null;dragPointer=null;});
+
+const menuToggle=$("#menuToggle"),menuBackdrop=$("#menuBackdrop");
+function closeMobileMenu(){document.body.classList.remove("mobile-menu-open");menuToggle?.setAttribute("aria-expanded","false");menuToggle?.setAttribute("aria-label","Открыть меню")}
+function toggleMobileMenu(){const open=!document.body.classList.contains("mobile-menu-open");document.body.classList.toggle("mobile-menu-open",open);menuToggle?.setAttribute("aria-expanded",String(open));menuToggle?.setAttribute("aria-label",open?"Закрыть меню":"Открыть меню")}
+menuToggle?.addEventListener("click",toggleMobileMenu);
+menuBackdrop?.addEventListener("click",closeMobileMenu);
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMobileMenu()});
+document.querySelectorAll(".left .nav").forEach(item=>item.addEventListener("click",closeMobileMenu));
+
 document.querySelectorAll(".dock-item").forEach(button=>button.addEventListener("click",()=>{const target=button.dataset.target;document.body.classList.remove("mobile-view-preview","mobile-view-templates","mobile-view-settings");document.body.classList.add("mobile-view-"+target);document.querySelectorAll(".dock-item").forEach(item=>item.classList.toggle("active",item===button));window.scrollTo({top:0,behavior:"smooth"});}));
 </script>
 </body></html>
