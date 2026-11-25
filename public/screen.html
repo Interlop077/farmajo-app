@@ -1190,7 +1190,7 @@ li{
   grid-template-rows:repeat(3,minmax(0,1fr));
 }
 
-/* ДЕКОРАТИВНЫЙ АКЦЕНТ ВМЕСТО ПУСТОГО МЕСТА СКРЫТОГО НАЗВАНИЯ */
+/* МЯГКОЕ СВЕЧЕНИЕ УГЛЕЙ ВМЕСТО ПУСТОГО МЕСТА СКРЫТОГО НАЗВАНИЯ */
 #stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section.category-title-hidden h2{
   display:flex;
   visibility:hidden;
@@ -1198,16 +1198,17 @@ li{
 #stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section.category-title-hidden h2::after{
   content:"";
   display:block;
-  width:min(360px,48%);
-  height:18px;
+  width:min(520px,70%);
+  height:42px;
   visibility:visible;
   background:
-    radial-gradient(circle at 50% 50%,#f2d184 0 3px,rgba(201,149,50,.75) 4px,transparent 6px),
-    linear-gradient(90deg,transparent 0%,rgba(201,149,50,.15) 8%,#bd8a36 50%,rgba(201,149,50,.15) 92%,transparent 100%);
-  background-repeat:no-repeat;
-  background-position:center;
-  background-size:100% 2px,100% 2px;
-  filter:drop-shadow(0 0 5px rgba(226,174,76,.5));
+    radial-gradient(ellipse at 50% 50%,rgba(255,190,91,.30) 0%,rgba(255,112,28,.18) 34%,transparent 72%),
+    radial-gradient(circle at 18% 54%,rgba(255,145,45,.9) 0 2px,transparent 5px),
+    radial-gradient(circle at 82% 46%,rgba(255,174,66,.8) 0 2px,transparent 5px),
+    radial-gradient(circle at 36% 28%,rgba(255,112,24,.55) 0 1px,transparent 4px),
+    radial-gradient(circle at 67% 72%,rgba(255,132,34,.6) 0 1px,transparent 4px);
+  filter:blur(3px) drop-shadow(0 0 12px rgba(232,128,36,.32));
+  opacity:.9;
 }
 /* При ровно 7 карточках: последняя занимает центральную колонку нижнего ряда */
 #stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:nth-child(7):last-child{
