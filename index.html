@@ -388,7 +388,7 @@ menuBackdrop?.addEventListener("click",closeMobileMenu);
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMobileMenu()});
 document.querySelectorAll(".left .nav").forEach(item=>item.addEventListener("click",()=>{const label=item.textContent.trim();document.querySelectorAll(".left .nav").forEach(n=>n.classList.remove("active"));item.classList.add("active");if(label.includes("Категории и блюда")){document.body.classList.add("section-catalog");renderCatalog();}else if(label.includes("Шаблоны")){document.body.classList.remove("section-catalog");document.body.classList.add("mobile-view-templates");}else{document.body.classList.remove("section-catalog");}closeMobileMenu();}));
 
-document.querySelectorAll(".dock-item").forEach(button=>button.addEventListener("click",()=>{const target=button.dataset.target;document.body.classList.remove("mobile-view-preview","mobile-view-templates","mobile-view-settings");document.body.classList.add("mobile-view-"+target);document.querySelectorAll(".dock-item").forEach(item=>item.classList.toggle("active",item===button));window.scrollTo({top:0,behavior:"smooth"});}));
+document.querySelectorAll(".dock-item").forEach(button=>button.addEventListener("click",()=>{const target=button.dataset.target;if(target==="preview")document.body.classList.remove("section-catalog");document.body.classList.remove("mobile-view-preview","mobile-view-templates","mobile-view-settings");document.body.classList.add("mobile-view-"+target);document.querySelectorAll(".dock-item").forEach(item=>item.classList.toggle("active",item===button));window.scrollTo({top:0,behavior:"smooth"});}));
 
 /* Categories and dishes editor — local prototype data */
 const initialCatalog=[
@@ -396,10 +396,11 @@ const initialCatalog=[
  {id:"cat-2",name:"Основные блюда",dishes:dishes.slice(3,6).map((d,i)=>({id:"dish-"+(i+3),name:d[0],price:d[1].split(" ")[0],currency:"MDL",emoji:d[2],description:""}))},
  {id:"cat-3",name:"Напитки",dishes:dishes.slice(6).map((d,i)=>({id:"dish-"+(i+6),name:d[0],price:d[1].split(" ")[0],currency:"MDL",emoji:d[2],description:""}))}
 ];
-let catalog=initialCatalog.map(c=>({...c,dishes:c.dishes.map(d=>({...d}))}));
+let catalog=(()=>{try{const saved=localStorage.getItem("menu-builder-catalog");if(saved){const parsed=JSON.parse(saved);if(Array.isArray(parsed))return parsed;}}catch(error){}return initialCatalog.map(c=>({...c,dishes:c.dishes.map(d=>({...d}))}));})();
 let activeCategoryId=catalog[0].id,editingDishId=null;
 const catalogList=$("#categoryList"),catalogDishes=$("#catalogDishList"),dishEditor=$("#dishEditor");
 function renderCatalog(){
+ try{localStorage.setItem("menu-builder-catalog",JSON.stringify(catalog));}catch(error){}
  const active=catalog.find(c=>c.id===activeCategoryId)||catalog[0];if(active)activeCategoryId=active.id;
  $("#categoryCount").textContent=catalog.length;
  catalogList.innerHTML=catalog.map(c=>'<div class="category-row"><button type="button" class="category-select '+(active&&c.id===active.id?'active':'')+'" data-category="'+c.id+'"><span>'+escapeCatalog(c.name)+'</span><small>'+c.dishes.length+' поз.</small></button><button type="button" class="icon-btn" data-rename-category="'+c.id+'" aria-label="Переименовать категорию">✎</button></div>').join("")||'<div class="catalog-empty">Пока нет категорий.<br>Создайте первую категорию.</div>';
