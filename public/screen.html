@@ -1204,11 +1204,14 @@ async function load(){
 
   r[3].data.forEach(x=>vis[x.category_id]=x.visible);
 
+  window.__displayScaleConfig={};
   r[5].data.forEach(x=>{
     if(x.key==='season')season=x.value;
     if(x.key==='screen3_logo_url')screen3Logo=x.value;
     if(x.key==='screen3_logo_enabled')screen3LogoEnabled=x.value!=='false';
     if(x.key==='menu_theme')window.__menuTheme=x.value||'dark';
+    if(x.key.startsWith('display_scale_mode_'))window.__displayScaleConfig[x.key.replace('display_scale_mode_','')]={...(window.__displayScaleConfig[x.key.replace('display_scale_mode_','')]||{}),mode:x.value};
+    if(x.key.startsWith('display_scale_percent_'))window.__displayScaleConfig[x.key.replace('display_scale_percent_','')]={...(window.__displayScaleConfig[x.key.replace('display_scale_percent_','')]||{}),percent:x.value};
   });
 
   render(
@@ -1373,6 +1376,7 @@ function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled){
   }
 
   fit();
+  f();
 
   const v=document.getElementById('video');
 
@@ -1524,11 +1528,11 @@ refresh();
 
 function f(){
 
-  const s=Math.min(
-    innerWidth/1920,
-    innerHeight/1080
-  );
-
+  const fitScale=Math.min(innerWidth/1920,innerHeight/1080);
+  const cfg=(window.__displayScaleConfig||{})[ID]||{};
+  const manual=cfg.mode==='manual';
+  const percent=Math.max(25,Math.min(150,Number(cfg.percent)||100));
+  const s=fitScale*(manual?percent/100:1);
   const e=document.getElementById('stage');
 
   e.style.transform='scale('+s+')';
