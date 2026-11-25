@@ -259,10 +259,29 @@ body{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
   aside.left,.mobile-menu-backdrop{transition:none}
 }
 
+/* Make the mobile drawer trigger unmistakable and easy to tap */
+@media screen and (max-width:620px){
+  .mobile-menu-toggle{
+    display:inline-flex !important;
+    width:auto !important;
+    min-width:92px !important;
+    height:36px !important;
+    padding:0 11px !important;
+    gap:7px !important;
+    white-space:nowrap !important;
+    font-size:13px !important;
+    font-weight:700 !important;
+    border:1px solid rgba(190,220,255,.32) !important;
+    background:linear-gradient(135deg,rgba(190,220,255,.2),rgba(255,255,255,.07)) !important;
+    box-shadow:inset 0 1px rgba(255,255,255,.14),0 4px 14px rgba(0,0,0,.16) !important;
+  }
+  .mobile-menu-toggle span{display:inline !important}
+}
+
 </style>
 </head>
 <body>
-<header class="top"><button class="mobile-menu-toggle" id="menuToggle" type="button" aria-label="Открыть меню" aria-expanded="false">☰</button><div class="brand">MENU<span>BUILDER</span> <span class="pill">ПРОТОТИП</span></div><div class="actions"><button class="btn" id="save">Сохранить черновик</button><button class="btn primary" id="publish">Опубликовать</button></div></header>
+<header class="top"><button class="mobile-menu-toggle" id="menuToggle" type="button" aria-label="Открыть меню" aria-expanded="false">☰ <span>Разделы</span></button><div class="brand">MENU<span>BUILDER</span> <span class="pill">ПРОТОТИП</span></div><div class="actions"><button class="btn" id="save">Сохранить черновик</button><button class="btn primary" id="publish">Опубликовать</button></div></header>
 <div class="mobile-menu-backdrop" id="menuBackdrop"></div>
 <nav class="mobile-tabs" aria-label="Быстрая навигация"><button class="dock-item active" data-target="preview"><span>▣</span><small>Просмотр</small></button><button class="dock-item" data-target="templates"><span>✧</span><small>Шаблоны</small></button><button class="dock-item" data-target="controls"><span>☷</span><small>Настройки</small></button></nav>
 <div class="layout">
