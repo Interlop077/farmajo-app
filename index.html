@@ -95,6 +95,44 @@ body{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
   body.mobile-view-settings .right .eyebrow{margin:15px 7px 8px}
 }
 
+
+/* Instagram-style full-width bottom navigation on mobile */
+@media(max-width:620px){
+  body{padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+  .mobile-tabs{
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    transform:none;
+    width:100%;
+    max-width:none;
+    min-height:64px;
+    padding:8px 12px calc(8px + env(safe-area-inset-bottom));
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    gap:8px;
+    border:0;
+    border-top:1px solid rgba(255,255,255,.18);
+    border-radius:0;
+    background:rgba(13,19,32,.88);
+    backdrop-filter:blur(26px) saturate(170%);
+    -webkit-backdrop-filter:blur(26px) saturate(170%);
+    box-shadow:0 -8px 28px rgba(0,0,0,.22);
+  }
+  .dock-item{
+    flex:1;
+    min-width:0;
+    max-width:180px;
+    padding:5px 4px;
+    border-radius:12px;
+    gap:4px;
+  }
+  .dock-item span{font-size:20px;line-height:1}
+  .dock-item small{font-size:10px;white-space:nowrap}
+}
+
 </style>
 </head>
 <body>
