@@ -787,7 +787,8 @@ li{
 
 #stage.theme-luxury #menu.screen3.luxury-paged .menu-page section ul{
   display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
+  /* 6 внутренних колонок сохраняют прежнюю ширину карточек (каждая занимает 2) и позволяют центрировать неполный нижний ряд */
+  grid-template-columns:repeat(6,minmax(0,1fr));
   grid-template-rows:repeat(3,minmax(0,1fr));
   gap:14px 16px;
   margin:0;
@@ -1139,9 +1140,89 @@ li{
   #stage.screen3-stage.screen3-bg > #atmosphere:after{animation:none;}
 }
 
-/* При ровно 7 карточках: последняя занимает центральную колонку нижнего ряда */
-#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:nth-child(7):last-child{
-  grid-column:2;
+
+/* НАЗВАНИЕ КАТЕГОРИИ ПОВЕРХ ФОНОВОГО ЗАГОЛОВКА */
+/* Разрешаем заголовку категории выходить из области сетки вверх */
+#stage.theme-luxury #menu.screen3.luxury-paged .menu-page.active{
+  z-index:2;
+}
+#stage.theme-luxury #menu.screen3.luxury-paged .menu-page main{
+  overflow:visible;
+}
+#stage.theme-luxury #menu.screen3.luxury-paged .menu-page section h2{
+  position:absolute;
+  top:-97px;
+  left:64px;
+  right:64px;
+  z-index:5;
+  display:block;
+  box-sizing:border-box;
+  height:64px;
+  margin:0;
+  padding:0 20px;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  font-family:Georgia,serif;
+  font-size:40px;
+  font-weight:700;
+  line-height:64px;
+  letter-spacing:.025em;
+  text-align:center;
+  color:#d9a744;
+  -webkit-text-fill-color:#d9a744;
+  background:none;
+  opacity:1;
+  visibility:visible;
+  text-shadow:0 3px 18px rgba(221,151,38,.2);
+}
+#stage.theme-luxury #menu.screen3.luxury-paged .menu-page section.category-title-hidden h2{
+  display:none;
+}
+#stage.theme-luxury #menu.screen3.luxury-paged .menu-page section ul{
+  box-sizing:border-box;
+  height:790px;
+  grid-template-rows:repeat(3,minmax(0,1fr));
+}
+#stage.theme-luxury #menu.screen3.narrow.luxury-paged .menu-page section h2{
+  top:-65px;
+  left:28px;
+  right:28px;
+  height:44px;
+  font-size:26px;
+  line-height:44px;
+}
+#stage.theme-luxury #menu.screen3.narrow.luxury-paged .menu-page section ul{
+  height:auto;
+}
+/* На широком экране карточки занимают по 2 из 6 колонок — их размеры остаются прежними */
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card{
+  grid-column:span 2;
+}
+/* Если в нижнем ряду осталась 1 карточка — ставим её по центру */
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:nth-child(3n+1):last-child{
+  grid-column:3 / span 2;
+}
+/* Если в нижнем ряду осталось 2 карточки — центрируем их парой */
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:nth-child(3n+1):nth-last-child(2){
+  grid-column:2 / span 2;
+}
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:nth-child(3n+2):last-child{
+  grid-column:4 / span 2;
+}
+
+/* Если всего 3 карточки — две сверху по центру, третья снизу по центру */
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:first-child:nth-last-child(3){
+  grid-column:2 / span 2;
+  grid-row:1;
+}
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:first-child:nth-last-child(3) + .dish-card{
+  grid-column:4 / span 2;
+  grid-row:1;
+}
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:first-child:nth-last-child(3) + .dish-card + .dish-card{
+  grid-column:3 / span 2;
+  grid-row:2;
 }
 
 </style>
@@ -1201,6 +1282,7 @@ async function load(){
   let season='';
   let screen3Logo='';
   let screen3LogoEnabled=true;
+  const categoryTitleVisibility={};
 
   r[3].data.forEach(x=>vis[x.category_id]=x.visible);
 
@@ -1209,6 +1291,7 @@ async function load(){
     if(x.key==='season')season=x.value;
     if(x.key==='screen3_logo_url')screen3Logo=x.value;
     if(x.key==='screen3_logo_enabled')screen3LogoEnabled=x.value!=='false';
+    if(x.key.startsWith('screen3_category_title_'))categoryTitleVisibility[x.key.replace('screen3_category_title_','')]=x.value!=='false';
     if(x.key==='menu_theme')window.__menuTheme=x.value||'dark';
     if(x.key.startsWith('display_scale_mode_'))window.__displayScaleConfig[x.key.replace('display_scale_mode_','')]={...(window.__displayScaleConfig[x.key.replace('display_scale_mode_','')]||{}),mode:x.value};
     if(x.key.startsWith('display_scale_percent_'))window.__displayScaleConfig[x.key.replace('display_scale_percent_','')]={...(window.__displayScaleConfig[x.key.replace('display_scale_percent_','')]||{}),percent:x.value};
@@ -1220,11 +1303,12 @@ async function load(){
     r[2].data,
     r[4].data.filter(v=>!v.season||v.season===season),
     screen3Logo,
-    screen3LogoEnabled
+    screen3LogoEnabled,
+    categoryTitleVisibility
   );
 }
 
-function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled){
+function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled,categoryTitleVisibility){
 
   const selectedTheme=(window.__menuTheme||'dark');
   const stage=document.getElementById('stage');
@@ -1313,7 +1397,7 @@ function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled){
     body=pages.map((page,index)=>`
       <div class="menu-page${index===0?' active':''}" data-page="${index}">
         <main>
-          <section>
+          <section class="${categoryTitleVisibility[String(page.category.id)]===false?'category-title-hidden':''}">
             <h2 class="cu">${esc(page.category.name)}</h2>
             <ul>${page.items.map(dishCard).join('')}</ul>
           </section>
@@ -1364,7 +1448,7 @@ function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled){
 
   const m=document.getElementById('menu');
 
-  m.className=(ID==='screen3'?'screen3 ':'')+(wide?'':'narrow');
+  m.className=(ID==='screen3'?'screen3 ':'')+(wide?'':'narrow')+(luxury3?' show-category-titles':'');
   m.style.width=mw+'px';
   m.innerHTML=head+(luxury3?body:'<main>'+body+'</main>');
 
