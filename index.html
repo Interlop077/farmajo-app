@@ -61,6 +61,40 @@ body{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
 .drag-handle:active{cursor:grabbing;background:rgba(90,130,180,.8)}
 .drag-hint{font-size:11px;color:var(--muted);margin-top:9px;text-align:center}
 @media(prefers-reduced-motion:reduce){.dish{transition:none}}
+
+/* Compact single-panel navigation for phones; desktop layout remains unchanged */
+@media(max-width:620px){
+  body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+  .top{height:52px;padding:0 11px}
+  .brand{font-size:12px;letter-spacing:.025em}
+  .brand .pill{font-size:9px;padding:4px 7px}
+  .top .actions{gap:5px}
+  .top .actions .btn{padding:7px 9px;font-size:11px}
+  .mobile-tabs{bottom:calc(9px + env(safe-area-inset-bottom));width:min(88vw,340px);padding:6px 8px;border-radius:20px}
+  .dock-item{padding:6px 4px;gap:2px}
+  .dock-item span{font-size:17px}
+  .dock-item small{font-size:9px}
+  .center{padding:10px 9px}
+  .center-head{margin-bottom:10px;align-items:center}
+  .center h1{font-size:16px}
+  .center-head .muted{font-size:11px}
+  .center-head>.pill{font-size:9px;padding:5px 7px;white-space:nowrap}
+  .preview-wrap{padding:7px;border-radius:16px}
+  .preview-top{font-size:9px;margin-bottom:7px}
+  .screen{border-radius:8px}
+  .drag-hint{font-size:9px;margin-top:6px}
+  .right{display:none;margin:8px 9px 14px;padding:13px 11px}
+  body.mobile-view-templates .center,body.mobile-view-settings .center{display:none}
+  body.mobile-view-templates .right,body.mobile-view-settings .right{display:block}
+  body.mobile-view-preview .right{display:none}
+  body.mobile-view-templates .right>*:not(:first-child):not(.template){display:none}
+  body.mobile-view-settings .right>.eyebrow:first-child,
+  body.mobile-view-settings .right>.template{display:none}
+  body.mobile-view-templates .right .template{padding:16px;margin:9px 0}
+  body.mobile-view-settings .right .field{padding:11px;margin:8px 0}
+  body.mobile-view-settings .right .eyebrow{margin:15px 7px 8px}
+}
+
 </style>
 </head>
 <body>
@@ -87,6 +121,6 @@ $("#dishGrid").addEventListener("pointerdown",e=>{const handle=e.target.closest(
 document.addEventListener("pointermove",e=>{if(!draggedCard||e.pointerId!==dragPointer)return;const over=document.elementFromPoint(e.clientX,e.clientY)?.closest("#dishGrid .dish");if(!over||over===draggedCard)return;const r=over.getBoundingClientRect();const after=e.clientY>r.top+r.height/2;over.parentNode.insertBefore(draggedCard,after?over.nextSibling:over);});
 document.addEventListener("pointerup",e=>{if(!draggedCard||e.pointerId!==dragPointer)return;draggedCard.classList.remove("dragging");const ids=[...$("#dishGrid").children].map(el=>Number(el.dataset.dishId));const byId=new Map(orderedDishes.map(item=>[item.id,item]));const reordered=ids.map(id=>byId.get(id)).filter(Boolean);const shown=new Set(ids);orderedDishes=[...reordered,...orderedDishes.filter(item=>!shown.has(item.id))];draggedCard=null;dragPointer=null;});
 document.addEventListener("pointercancel",()=>{if(draggedCard){draggedCard.classList.remove("dragging");render();}draggedCard=null;dragPointer=null;});
-document.querySelectorAll(".dock-item").forEach(button=>button.addEventListener("click",()=>{const target=button.dataset.target;const node=target==="preview"?document.querySelector(".preview-wrap"):target==="templates"?document.querySelector(".right .eyebrow"):document.querySelector("#settingsControls");node?.scrollIntoView({behavior:"smooth",block:"start"});document.querySelectorAll(".dock-item").forEach(item=>item.classList.toggle("active",item===button));}));
+document.querySelectorAll(".dock-item").forEach(button=>button.addEventListener("click",()=>{const target=button.dataset.target;document.body.classList.remove("mobile-view-preview","mobile-view-templates","mobile-view-settings");document.body.classList.add("mobile-view-"+target);document.querySelectorAll(".dock-item").forEach(item=>item.classList.toggle("active",item===button));window.scrollTo({top:0,behavior:"smooth"});}));
 </script>
 </body></html>
