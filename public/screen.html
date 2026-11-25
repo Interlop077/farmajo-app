@@ -1140,75 +1140,48 @@ li{
 }
 
 
-/* Управляемое отображение названий категорий на экране 3 */
-#stage.theme-luxury #menu.screen3.luxury-paged.show-category-titles .menu-page section h2{
-  height:auto;
-  margin:0 0 18px;
-  overflow:visible;
-  opacity:1;
-  font-family:Georgia,serif;
-  font-size:44px;
-  line-height:1.08;
-  letter-spacing:.04em;
-  text-align:center;
-  color:#f0c66f;
-  text-shadow:0 2px 16px rgba(218,171,86,.32);
-}
-#stage.theme-luxury #menu.screen3.luxury-paged.show-category-titles .menu-page section ul{
-  height:720px;
-}
-#stage.theme-luxury #menu.screen3.narrow.luxury-paged.show-category-titles .menu-page section h2{
-  font-size:32px;
-  margin-bottom:14px;
-}
-#stage.theme-luxury #menu.screen3.narrow.luxury-paged.show-category-titles .menu-page section ul{
-  height:auto;
-}
-
-#stage.theme-luxury #menu.screen3.luxury-paged .menu-page section.category-title-hidden h2{display:none;}
-#stage.theme-luxury #menu.screen3.luxury-paged .menu-page section.category-title-hidden ul{height:790px;}
-#stage.theme-luxury #menu.screen3.narrow.luxury-paged .menu-page section.category-title-hidden ul{height:auto;}
-
-/* ФИКСИРОВАННАЯ ОБЛАСТЬ НАЗВАНИЯ: одинаковая сетка карточек при показе и скрытии */
-#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section h2{
-  display:flex;
-  align-items:center;
-  justify-content:center;
+/* НАЗВАНИЕ КАТЕГОРИИ ПОВЕРХ ФОНОВОГО ЗАГОЛОВКА */
+#stage.theme-luxury #menu.screen3.luxury-paged .menu-page section h2{
+  position:absolute;
+  top:-112px;
+  left:64px;
+  right:64px;
+  z-index:5;
+  display:block;
   box-sizing:border-box;
-  height:58px;
-  margin:0 0 18px;
+  height:64px;
+  margin:0;
+  padding:0 20px;
   overflow:hidden;
-  opacity:1;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  font-family:Georgia,serif;
+  font-size:48px;
+  font-weight:700;
+  line-height:64px;
+  letter-spacing:.025em;
+  text-align:center;
+  color:#d9a744;
+  text-shadow:0 3px 18px rgba(221,151,38,.2);
 }
-#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section.category-title-hidden h2{
-  visibility:hidden;
+#stage.theme-luxury #menu.screen3.luxury-paged .menu-page section.category-title-hidden h2{
+  display:none;
 }
-#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul,
-#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section.category-title-hidden ul{
+#stage.theme-luxury #menu.screen3.luxury-paged .menu-page section ul{
   box-sizing:border-box;
-  height:720px;
+  height:790px;
   grid-template-rows:repeat(3,minmax(0,1fr));
 }
-
-/* МЯГКОЕ СВЕЧЕНИЕ УГЛЕЙ ВМЕСТО ПУСТОГО МЕСТА СКРЫТОГО НАЗВАНИЯ */
-#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section.category-title-hidden h2{
-  display:flex;
-  visibility:hidden;
+#stage.theme-luxury #menu.screen3.narrow.luxury-paged .menu-page section h2{
+  top:-72px;
+  left:28px;
+  right:28px;
+  height:44px;
+  font-size:30px;
+  line-height:44px;
 }
-#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section.category-title-hidden h2::after{
-  content:"";
-  display:block;
-  width:min(520px,70%);
-  height:42px;
-  visibility:visible;
-  background:
-    radial-gradient(ellipse at 50% 50%,rgba(255,190,91,.30) 0%,rgba(255,112,28,.18) 34%,transparent 72%),
-    radial-gradient(circle at 18% 54%,rgba(255,145,45,.9) 0 2px,transparent 5px),
-    radial-gradient(circle at 82% 46%,rgba(255,174,66,.8) 0 2px,transparent 5px),
-    radial-gradient(circle at 36% 28%,rgba(255,112,24,.55) 0 1px,transparent 4px),
-    radial-gradient(circle at 67% 72%,rgba(255,132,34,.6) 0 1px,transparent 4px);
-  filter:blur(3px) drop-shadow(0 0 12px rgba(232,128,36,.32));
-  opacity:.9;
+#stage.theme-luxury #menu.screen3.narrow.luxury-paged .menu-page section ul{
+  height:auto;
 }
 /* При ровно 7 карточках: последняя занимает центральную колонку нижнего ряда */
 #stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:nth-child(7):last-child{
