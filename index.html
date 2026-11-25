@@ -278,6 +278,52 @@ body{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
   .mobile-menu-toggle span{display:inline !important}
 }
 
+
+/* Categories & dishes workspace */
+.catalog-section{display:none;min-width:0;padding:26px clamp(12px,3vw,34px) 40px;grid-column:2/4}
+body.section-catalog .center,body.section-catalog .right{display:none!important}
+body.section-catalog .catalog-section{display:block}
+.catalog-heading{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:22px}
+.catalog-heading .eyebrow{margin:0 0 8px}
+.catalog-heading h1{font-size:25px;margin:0 0 7px}
+.catalog-heading p{margin:0}
+.catalog-layout{display:grid;grid-template-columns:minmax(220px,280px) minmax(0,1fr);gap:18px;align-items:start}
+.glass-panel{background:linear-gradient(145deg,rgba(255,255,255,.105),rgba(255,255,255,.035));border:1px solid rgba(255,255,255,.16);border-radius:20px;box-shadow:0 18px 48px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.13);backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px) saturate(150%);padding:18px}
+.panel-title{font-size:16px;font-weight:800;display:flex;align-items:center;gap:10px}
+.category-list{display:grid;gap:7px;margin-top:15px}
+.category-row{display:flex;align-items:center;gap:8px}
+.category-select{flex:1;min-width:0;text-align:left;padding:11px 12px;border:1px solid transparent;border-radius:12px;background:rgba(255,255,255,.045);color:var(--text);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.category-select.active{background:rgba(184,216,255,.16);border-color:rgba(195,224,255,.32)}
+.category-select small{color:var(--muted);white-space:nowrap}
+.icon-btn{width:34px;height:34px;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#eaf2ff;font-size:18px}
+.dish-panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:15px;border-bottom:1px solid rgba(255,255,255,.12)}
+.dish-panel-head .muted{font-size:12px;margin-top:5px}
+.catalog-dish-list{display:grid;gap:9px;padding-top:14px}
+.catalog-dish{display:grid;grid-template-columns:64px minmax(0,1fr) auto;align-items:center;gap:13px;padding:10px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.045)}
+.catalog-dish-thumb{width:64px;height:58px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(177,205,239,.22),rgba(255,255,255,.06));overflow:hidden;font-size:23px}
+.catalog-dish-thumb img{width:100%;height:100%;object-fit:cover}
+.catalog-dish-name{font-weight:750}
+.catalog-dish-desc{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4}
+.catalog-dish-price{font-weight:800;color:#d8e8ff;white-space:nowrap}
+.catalog-dish-actions{display:flex;gap:5px;margin-left:8px}
+.catalog-dish-actions button{padding:6px 8px;font-size:12px}
+.dish-editor{margin-top:17px;padding:17px;border-radius:16px;border:1px solid rgba(185,215,255,.25);background:rgba(6,12,22,.42)}
+.dish-editor[hidden]{display:none}
+.editor-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}
+.editor-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px}
+.editor-grid label{display:grid;gap:6px;font-size:12px;color:#c8d5e8}
+.editor-grid input,.editor-grid select,.editor-grid textarea{width:100%;min-width:0;padding:10px 11px;border:1px solid rgba(255,255,255,.16);border-radius:10px;background:rgba(255,255,255,.07);color:var(--text);outline:none}
+.editor-grid textarea{resize:vertical}
+.editor-grid input:focus,.editor-grid select:focus,.editor-grid textarea:focus{border-color:rgba(185,215,255,.65);box-shadow:0 0 0 3px rgba(185,215,255,.1)}
+.editor-grid .wide{grid-column:1/-1}
+.editor-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.catalog-empty{padding:35px 14px;text-align:center;color:var(--muted);border:1px dashed rgba(255,255,255,.17);border-radius:14px;line-height:1.6}
+.catalog-footnote{font-size:11px;color:var(--muted);margin-top:15px}
+body.section-catalog .layout{grid-template-columns:230px minmax(0,1fr)}
+body.section-catalog .catalog-section{grid-column:2}
+@media(max-width:900px){body.section-catalog .layout{grid-template-columns:190px minmax(0,1fr)}.catalog-layout{grid-template-columns:1fr}.category-panel{order:0}.dish-panel{order:1}}
+@media(max-width:620px){body.section-catalog .layout{display:block}.catalog-section{padding:18px 10px 110px}.catalog-heading{align-items:flex-start;flex-direction:column}.catalog-heading h1{font-size:21px}.catalog-heading>.btn{width:100%}.catalog-layout{gap:12px}.glass-panel{padding:13px;border-radius:17px}.dish-panel-head{align-items:flex-start;flex-direction:column}.dish-panel-head>.btn{width:100%}.catalog-dish{grid-template-columns:52px minmax(0,1fr);gap:9px}.catalog-dish-thumb{width:52px;height:52px}.catalog-dish-price{grid-column:2;grid-row:2}.catalog-dish-actions{grid-column:1/-1;justify-content:flex-end;margin:0}.editor-grid{grid-template-columns:1fr 1fr}.editor-grid label:first-child,.editor-grid .wide{grid-column:1/-1}}
+
 </style>
 </head>
 <body>
@@ -290,6 +336,34 @@ body{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
 <div class="preview-wrap"><div class="preview-top"><span>ПРЕДПРОСМОТР · ТВ-ЭКРАН</span><span class="status" id="previewStatus">● Изменения отображаются сразу</span></div><div class="screen" id="screen"><div class="screen-inner"><div class="screen-head"><div class="logo">М</div><div><div class="restaurant" id="brandName">МЕСТО ВСТРЕЧИ</div><div class="subtitle">КАФЕ · ГОРОДСКАЯ КУХНЯ</div></div></div><div class="category">Популярное меню</div><div class="dish-grid" id="dishGrid"></div><div class="screen-footer">СВЕЖИЕ ПРОДУКТЫ · ГОТОВИМ С ЛЮБОВЬЮ</div></div></div><div class="drag-hint">Перетаскивайте карточки за значок ⠿, чтобы изменить порядок</div></div>
 <div style="display:flex;justify-content:space-between;align-items:center;max-width:1000px;margin:14px auto 0"><span class="muted">Предпросмотр обновляется автоматически</span><button class="btn" id="reset">Сбросить демо</button></div>
 </main>
+<section class="catalog-section" id="catalogSection" aria-label="Категории и блюда">
+  <div class="catalog-heading">
+    <div><div class="eyebrow">УПРАВЛЕНИЕ МЕНЮ</div><h1>Категории и блюда</h1><p class="muted">Создавайте структуру меню, редактируйте позиции и управляйте ценами</p></div>
+    <button class="btn primary" id="addCategoryBtn" type="button">＋ Новая категория</button>
+  </div>
+  <div class="catalog-layout">
+    <div class="category-panel glass-panel">
+      <div class="panel-title">Категории <span class="pill" id="categoryCount">0</span></div>
+      <div id="categoryList" class="category-list"></div>
+    </div>
+    <div class="dish-panel glass-panel">
+      <div class="dish-panel-head"><div><div class="panel-title" id="activeCategoryTitle">Выберите категорию</div><div class="muted" id="activeCategoryMeta">Ваши блюда появятся здесь</div></div><button class="btn primary" id="addDishBtn" type="button">＋ Добавить блюдо</button></div>
+      <div id="catalogDishList" class="catalog-dish-list"></div>
+      <div id="dishEditor" class="dish-editor" hidden>
+        <div class="editor-title"><strong id="dishEditorTitle">Новое блюдо</strong><button class="icon-btn" id="closeDishEditor" type="button" aria-label="Закрыть">×</button></div>
+        <div class="editor-grid">
+          <label>Название блюда<input id="dishNameInput" type="text" placeholder="Например, Бургер фирменный"></label>
+          <label>Цена<input id="dishPriceInput" type="text" placeholder="145"></label>
+          <label>Валюта<select id="dishCurrencyInput"><option value="MDL">MDL — лей</option><option value="RUB">RUB — рубль</option><option value="EUR">EUR — евро</option><option value="USD">USD — доллар</option></select></label>
+          <label>Фото (ссылка)<input id="dishImageInput" type="url" placeholder="https://..."></label>
+          <label class="wide">Описание<textarea id="dishDescriptionInput" rows="3" placeholder="Краткое описание блюда и состав"></textarea></label>
+        </div>
+        <div class="editor-actions"><button class="btn" id="cancelDishBtn" type="button">Отмена</button><button class="btn primary" id="saveDishBtn" type="button">Сохранить блюдо</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="catalog-footnote">Изменения пока сохраняются в этом браузере. Подключение к аккаунту и облачной базе добавим на следующем этапе.</div>
+</section>
 <aside class="right"><div class="eyebrow">ШАБЛОНЫ ОФОРМЛЕНИЯ</div>
 <div class="template selected" data-template="premium"><strong>✦ Тёмный премиум</strong><small>Тёмный фон, золотые акценты</small></div><div class="template" data-template="light"><strong>☼ Светлый минимализм</strong><small>Светлый фон, чистая типографика</small></div><div class="template" data-template="rustic"><strong>♨ Ресторан / гриль</strong><small>Тёплые оттенки, фактурный фон</small></div>
 <div class="eyebrow" id="settingsControls">НАСТРОЙКИ СЕТКИ</div><div class="field"><label>Карточек на слайде <strong id="countLabel">6</strong></label><input id="count" type="range" min="2" max="9" value="6"></div><div class="field"><label>Размер фотографий</label><select id="photoSize"><option value="compact">Компактный</option><option value="normal" selected>Стандартный</option><option value="large">Крупный</option></select></div><div class="field"><label>Отступы между карточками</label><input id="gap" type="range" min="1" max="6" value="2"></div>
@@ -312,8 +386,43 @@ function toggleMobileMenu(){const open=!document.body.classList.contains("mobile
 menuToggle?.addEventListener("click",toggleMobileMenu);
 menuBackdrop?.addEventListener("click",closeMobileMenu);
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMobileMenu()});
-document.querySelectorAll(".left .nav").forEach(item=>item.addEventListener("click",closeMobileMenu));
+document.querySelectorAll(".left .nav").forEach(item=>item.addEventListener("click",()=>{const label=item.textContent.trim();document.querySelectorAll(".left .nav").forEach(n=>n.classList.remove("active"));item.classList.add("active");if(label.includes("Категории и блюда")){document.body.classList.add("section-catalog");renderCatalog();}else if(label.includes("Шаблоны")){document.body.classList.remove("section-catalog");document.body.classList.add("mobile-view-templates");}else{document.body.classList.remove("section-catalog");}closeMobileMenu();}));
 
 document.querySelectorAll(".dock-item").forEach(button=>button.addEventListener("click",()=>{const target=button.dataset.target;document.body.classList.remove("mobile-view-preview","mobile-view-templates","mobile-view-settings");document.body.classList.add("mobile-view-"+target);document.querySelectorAll(".dock-item").forEach(item=>item.classList.toggle("active",item===button));window.scrollTo({top:0,behavior:"smooth"});}));
+
+/* Categories and dishes editor — local prototype data */
+const initialCatalog=[
+ {id:"cat-1",name:"Популярное",dishes:dishes.slice(0,3).map((d,i)=>({id:"dish-"+i,name:d[0],price:d[1].split(" ")[0],currency:"MDL",emoji:d[2],description:""}))},
+ {id:"cat-2",name:"Основные блюда",dishes:dishes.slice(3,6).map((d,i)=>({id:"dish-"+(i+3),name:d[0],price:d[1].split(" ")[0],currency:"MDL",emoji:d[2],description:""}))},
+ {id:"cat-3",name:"Напитки",dishes:dishes.slice(6).map((d,i)=>({id:"dish-"+(i+6),name:d[0],price:d[1].split(" ")[0],currency:"MDL",emoji:d[2],description:""}))}
+];
+let catalog=initialCatalog.map(c=>({...c,dishes:c.dishes.map(d=>({...d}))}));
+let activeCategoryId=catalog[0].id,editingDishId=null;
+const catalogList=$("#categoryList"),catalogDishes=$("#catalogDishList"),dishEditor=$("#dishEditor");
+function renderCatalog(){
+ const active=catalog.find(c=>c.id===activeCategoryId)||catalog[0];if(active)activeCategoryId=active.id;
+ $("#categoryCount").textContent=catalog.length;
+ catalogList.innerHTML=catalog.map(c=>'<div class="category-row"><button type="button" class="category-select '+(active&&c.id===active.id?'active':'')+'" data-category="'+c.id+'"><span>'+escapeCatalog(c.name)+'</span><small>'+c.dishes.length+' поз.</small></button><button type="button" class="icon-btn" data-rename-category="'+c.id+'" aria-label="Переименовать категорию">✎</button></div>').join("")||'<div class="catalog-empty">Пока нет категорий.<br>Создайте первую категорию.</div>';
+ $("#activeCategoryTitle").textContent=active?active.name:"Нет категории";
+ $("#activeCategoryMeta").textContent=active?active.dishes.length+" блюд в категории":"Добавьте категорию, чтобы продолжить";
+ $("#addDishBtn").disabled=!active;
+ catalogDishes.innerHTML=active&&active.dishes.length?active.dishes.map(d=>'<article class="catalog-dish"><div class="catalog-dish-thumb">'+(d.image?'<img src="'+escapeCatalog(d.image)+'" alt="">':(d.emoji||"🍽️"))+'</div><div><div class="catalog-dish-name">'+escapeCatalog(d.name)+'</div><div class="catalog-dish-desc">'+escapeCatalog(d.description||"Без описания")+'</div></div><div class="catalog-dish-price">'+escapeCatalog(d.price||"—")+" "+escapeCatalog(d.currency||"MDL")+'</div><div class="catalog-dish-actions"><button class="btn" data-edit-dish="'+d.id+'" type="button">Изменить</button><button class="btn" data-delete-dish="'+d.id+'" type="button">Удалить</button></div></article>').join(""):'<div class="catalog-empty">В этой категории пока нет блюд.<br>Нажмите «Добавить блюдо», чтобы создать первую позицию.</div>';
+}
+function escapeCatalog(value){return String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));}
+function openDishEditor(dish=null){
+ if(!catalog.find(c=>c.id===activeCategoryId))return;
+ editingDishId=dish?.id||null;$("#dishEditorTitle").textContent=dish?"Редактировать блюдо":"Новое блюдо";
+ $("#dishNameInput").value=dish?.name||"";$("#dishPriceInput").value=dish?.price||"";$("#dishCurrencyInput").value=dish?.currency||"MDL";$("#dishImageInput").value=dish?.image||"";$("#dishDescriptionInput").value=dish?.description||"";
+ dishEditor.hidden=false;$("#dishNameInput").focus();dishEditor.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function closeDishEditor(){dishEditor.hidden=true;editingDishId=null;}
+$("#addCategoryBtn").addEventListener("click",()=>{const name=prompt("Название новой категории:");if(!name||!name.trim())return;const id="cat-"+Date.now();catalog.push({id,name:name.trim(),dishes:[]});activeCategoryId=id;renderCatalog();});
+$("#addDishBtn").addEventListener("click",()=>openDishEditor());
+$("#closeDishEditor").addEventListener("click",closeDishEditor);$("#cancelDishBtn").addEventListener("click",closeDishEditor);
+$("#saveDishBtn").addEventListener("click",()=>{const name=$("#dishNameInput").value.trim();if(!name){alert("Укажите название блюда.");$("#dishNameInput").focus();return;}const cat=catalog.find(c=>c.id===activeCategoryId);if(!cat)return;const record={id:editingDishId||"dish-"+Date.now(),name,price:$("#dishPriceInput").value.trim(),currency:$("#dishCurrencyInput").value,image:$("#dishImageInput").value.trim(),description:$("#dishDescriptionInput").value.trim(),emoji:"🍽️"};if(editingDishId){const index=cat.dishes.findIndex(d=>d.id===editingDishId);if(index>=0)cat.dishes[index]=record;}else cat.dishes.push(record);closeDishEditor();renderCatalog();});
+catalogList.addEventListener("click",e=>{const select=e.target.closest("[data-category]"),rename=e.target.closest("[data-rename-category]");if(select){activeCategoryId=select.dataset.category;closeDishEditor();renderCatalog();}if(rename){const cat=catalog.find(c=>c.id===rename.dataset.renameCategory);const name=prompt("Новое название категории:",cat?.name||"");if(name&&name.trim()){cat.name=name.trim();renderCatalog();}}});
+catalogDishes.addEventListener("click",e=>{const edit=e.target.closest("[data-edit-dish]"),del=e.target.closest("[data-delete-dish]");const cat=catalog.find(c=>c.id===activeCategoryId);if(edit){const dish=cat?.dishes.find(d=>d.id===edit.dataset.editDish);if(dish)openDishEditor(dish);}if(del&&cat){const dish=cat.dishes.find(d=>d.id===del.dataset.deleteDish);if(dish&&confirm('Удалить блюдо «'+dish.name+'»?')){cat.dishes=cat.dishes.filter(d=>d.id!==dish.id);renderCatalog();}}});
+renderCatalog();
+
 </script>
 </body></html>
