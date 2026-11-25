@@ -787,7 +787,8 @@ li{
 
 #stage.theme-luxury #menu.screen3.luxury-paged .menu-page section ul{
   display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
+  /* 6 внутренних колонок сохраняют прежнюю ширину карточек (каждая занимает 2) и позволяют центрировать неполный нижний ряд */
+  grid-template-columns:repeat(6,minmax(0,1fr));
   grid-template-rows:repeat(3,minmax(0,1fr));
   gap:14px 16px;
   margin:0;
@@ -1194,9 +1195,20 @@ li{
 #stage.theme-luxury #menu.screen3.narrow.luxury-paged .menu-page section ul{
   height:auto;
 }
-/* При ровно 7 карточках: последняя занимает центральную колонку нижнего ряда */
-#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:nth-child(7):last-child{
-  grid-column:2;
+/* На широком экране карточки занимают по 2 из 6 колонок — их размеры остаются прежними */
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card{
+  grid-column:span 2;
+}
+/* Если в нижнем ряду осталась 1 карточка — ставим её по центру */
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:nth-child(3n+1):last-child{
+  grid-column:3 / span 2;
+}
+/* Если в нижнем ряду осталось 2 карточки — центрируем их парой */
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:nth-child(3n+1):nth-last-child(2){
+  grid-column:2 / span 2;
+}
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:nth-child(3n+2):last-child{
+  grid-column:4 / span 2;
 }
 
 </style>
