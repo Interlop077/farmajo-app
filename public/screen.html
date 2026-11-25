@@ -1139,6 +1139,32 @@ li{
   #stage.screen3-stage.screen3-bg > #atmosphere:after{animation:none;}
 }
 
+
+/* Управляемое отображение названий категорий на экране 3 */
+#stage.theme-luxury #menu.screen3.luxury-paged.show-category-titles .menu-page section h2{
+  height:auto;
+  margin:0 0 18px;
+  overflow:visible;
+  opacity:1;
+  font-family:Georgia,serif;
+  font-size:44px;
+  line-height:1.08;
+  letter-spacing:.04em;
+  text-align:center;
+  color:#f0c66f;
+  text-shadow:0 2px 16px rgba(218,171,86,.32);
+}
+#stage.theme-luxury #menu.screen3.luxury-paged.show-category-titles .menu-page section ul{
+  height:720px;
+}
+#stage.theme-luxury #menu.screen3.narrow.luxury-paged.show-category-titles .menu-page section h2{
+  font-size:32px;
+  margin-bottom:14px;
+}
+#stage.theme-luxury #menu.screen3.narrow.luxury-paged.show-category-titles .menu-page section ul{
+  height:auto;
+}
+
 /* При ровно 7 карточках: последняя занимает центральную колонку нижнего ряда */
 #stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:nth-child(7):last-child{
   grid-column:2;
@@ -1201,6 +1227,7 @@ async function load(){
   let season='';
   let screen3Logo='';
   let screen3LogoEnabled=true;
+  let screen3CategoryTitlesEnabled=true;
 
   r[3].data.forEach(x=>vis[x.category_id]=x.visible);
 
@@ -1209,6 +1236,7 @@ async function load(){
     if(x.key==='season')season=x.value;
     if(x.key==='screen3_logo_url')screen3Logo=x.value;
     if(x.key==='screen3_logo_enabled')screen3LogoEnabled=x.value!=='false';
+    if(x.key==='screen3_category_titles_enabled')screen3CategoryTitlesEnabled=x.value!=='false';
     if(x.key==='menu_theme')window.__menuTheme=x.value||'dark';
     if(x.key.startsWith('display_scale_mode_'))window.__displayScaleConfig[x.key.replace('display_scale_mode_','')]={...(window.__displayScaleConfig[x.key.replace('display_scale_mode_','')]||{}),mode:x.value};
     if(x.key.startsWith('display_scale_percent_'))window.__displayScaleConfig[x.key.replace('display_scale_percent_','')]={...(window.__displayScaleConfig[x.key.replace('display_scale_percent_','')]||{}),percent:x.value};
@@ -1220,11 +1248,12 @@ async function load(){
     r[2].data,
     r[4].data.filter(v=>!v.season||v.season===season),
     screen3Logo,
-    screen3LogoEnabled
+    screen3LogoEnabled,
+    screen3CategoryTitlesEnabled
   );
 }
 
-function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled){
+function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled,screen3CategoryTitlesEnabled){
 
   const selectedTheme=(window.__menuTheme||'dark');
   const stage=document.getElementById('stage');
@@ -1364,7 +1393,7 @@ function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled){
 
   const m=document.getElementById('menu');
 
-  m.className=(ID==='screen3'?'screen3 ':'')+(wide?'':'narrow');
+  m.className=(ID==='screen3'?'screen3 ':'')+(wide?'':'narrow')+(luxury3&&screen3CategoryTitlesEnabled?' show-category-titles':'');
   m.style.width=mw+'px';
   m.innerHTML=head+(luxury3?body:'<main>'+body+'</main>');
 
