@@ -1190,6 +1190,25 @@ li{
   grid-template-rows:repeat(3,minmax(0,1fr));
 }
 
+/* ДЕКОРАТИВНЫЙ АКЦЕНТ ВМЕСТО ПУСТОГО МЕСТА СКРЫТОГО НАЗВАНИЯ */
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section.category-title-hidden h2{
+  display:flex;
+  visibility:hidden;
+}
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section.category-title-hidden h2::after{
+  content:"";
+  display:block;
+  width:min(360px,48%);
+  height:18px;
+  visibility:visible;
+  background:
+    radial-gradient(circle at 50% 50%,#f2d184 0 3px,rgba(201,149,50,.75) 4px,transparent 6px),
+    linear-gradient(90deg,transparent 0%,rgba(201,149,50,.15) 8%,#bd8a36 50%,rgba(201,149,50,.15) 92%,transparent 100%);
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:100% 2px,100% 2px;
+  filter:drop-shadow(0 0 5px rgba(226,174,76,.5));
+}
 /* При ровно 7 карточках: последняя занимает центральную колонку нижнего ряда */
 #stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:nth-child(7):last-child{
   grid-column:2;
