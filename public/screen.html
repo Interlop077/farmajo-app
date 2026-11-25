@@ -1211,10 +1211,18 @@ li{
   grid-column:4 / span 2;
 }
 
-/* Если всего 3 карточки — ставим их одной вертикальной колонкой по центру */
-#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:first-child:nth-last-child(3),
-#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:first-child:nth-last-child(3) ~ .dish-card{
+/* Если всего 3 карточки — две сверху по центру, третья снизу по центру */
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:first-child:nth-last-child(3){
+  grid-column:2 / span 2;
+  grid-row:1;
+}
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:first-child:nth-last-child(3) + .dish-card{
+  grid-column:4 / span 2;
+  grid-row:1;
+}
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:first-child:nth-last-child(3) + .dish-card + .dish-card{
   grid-column:3 / span 2;
+  grid-row:2;
 }
 
 </style>
