@@ -1149,35 +1149,13 @@ li{
 #stage.theme-luxury #menu.screen3.luxury-paged .menu-page main{
   overflow:visible;
 }
+/* Заголовок категории выводится в общей шапке, поэтому не мигает между слайдами одной категории */
 #stage.theme-luxury #menu.screen3.luxury-paged .menu-page section h2{
-  position:absolute;
-  top:-97px;
-  left:64px;
-  right:64px;
-  z-index:5;
-  display:block;
-  box-sizing:border-box;
-  height:64px;
-  margin:0;
-  padding:0 20px;
-  overflow:hidden;
-  white-space:nowrap;
-  text-overflow:ellipsis;
-  font-family:Georgia,serif;
-  font-size:40px;
-  font-weight:700;
-  line-height:64px;
-  letter-spacing:.025em;
-  text-align:center;
-  color:#d9a744;
-  -webkit-text-fill-color:#d9a744;
-  background:none;
-  opacity:1;
-  visibility:visible;
-  text-shadow:0 3px 18px rgba(221,151,38,.2);
-}
-#stage.theme-luxury #menu.screen3.luxury-paged .menu-page section.category-title-hidden h2{
   display:none;
+}
+#stage.theme-luxury #menu.screen3.luxury-paged.category-title-active .screen3-main-title .screen3-title-text{
+  font-size:40px;
+  line-height:64px;
 }
 #stage.theme-luxury #menu.screen3.luxury-paged .menu-page section ul{
   box-sizing:border-box;
@@ -1189,6 +1167,10 @@ li{
   left:28px;
   right:28px;
   height:44px;
+  font-size:26px;
+  line-height:44px;
+}
+#stage.theme-luxury #menu.screen3.narrow.luxury-paged.category-title-active .screen3-main-title .screen3-title-text{
   font-size:26px;
   line-height:44px;
 }
@@ -1397,7 +1379,7 @@ function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled,categoryTitle
     body=pages.map((page,index)=>`
       <div class="menu-page${index===0?' active':''}" data-page="${index}">
         <main>
-          <section class="${categoryTitleVisibility[String(page.category.id)]===false?'category-title-hidden':''}">
+          <section data-category-id="${esc(page.category.id)}" class="${categoryTitleVisibility[String(page.category.id)]===false?'category-title-hidden':''}">
             <h2 class="cu">${esc(page.category.name)}</h2>
             <ul>${page.items.map(dishCard).join('')}</ul>
           </section>
@@ -1434,7 +1416,7 @@ function render(scr,cats,items,vids,screen3Logo,screen3LogoEnabled,categoryTitle
         <div class="screen3-main-title">
           <div class="screen3-title-rule"></div>
           <div class="screen3-flame" aria-hidden="true">♨</div>
-          <div class="screen3-title-text">МЯСО НА МАНГАЛЕ</div>
+          <div class="screen3-title-text" id="screen3-category-title">МЯСО НА МАНГАЛЕ</div>
           <div class="screen3-title-rule"></div>
         </div>
         <div class="screen3-tagline">Настоящий вкус<br>на живом огне</div>
@@ -1521,9 +1503,28 @@ function startMenuPaging(){
 
   const pages=[...menu.querySelectorAll('.menu-page')];
 
-  if(pages.length<2)return;
+  let currentCategoryId=null;
+  const categoryHeader=document.getElementById('screen3-category-title');
+
+  const syncCategoryHeader=()=>{
+    const activePage=pages[menuPageIndex];
+    const section=activePage&&activePage.querySelector('section');
+    const categoryId=section?section.dataset.categoryId:null;
+
+    if(categoryId===currentCategoryId)return;
+    currentCategoryId=categoryId;
+
+    const isTitleVisible=!!section&&!section.classList.contains('category-title-hidden');
+    categoryHeader.textContent=isTitleVisible
+      ?section.querySelector('h2')?.textContent||'МЯСО НА МАНГАЛЕ'
+      :'МЯСО НА МАНГАЛЕ';
+    menu.classList.toggle('category-title-active',isTitleVisible);
+  };
 
   menuPageIndex=0;
+  syncCategoryHeader();
+
+  if(pages.length<2)return;
 
   menuPageTimer=setInterval(()=>{
 
@@ -1536,6 +1537,7 @@ function startMenuPaging(){
     menuPageIndex=(menuPageIndex+1)%pages.length;
 
     pages[menuPageIndex].classList.add('active');
+    syncCategoryHeader();
 
   },9000);
 }
