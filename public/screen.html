@@ -1141,6 +1141,13 @@ li{
 
 
 /* НАЗВАНИЕ КАТЕГОРИИ ПОВЕРХ ФОНОВОГО ЗАГОЛОВКА */
+/* Разрешаем заголовку категории выходить из области сетки вверх */
+#stage.theme-luxury #menu.screen3.luxury-paged .menu-page.active{
+  z-index:2;
+}
+#stage.theme-luxury #menu.screen3.luxury-paged .menu-page main{
+  overflow:visible;
+}
 #stage.theme-luxury #menu.screen3.luxury-paged .menu-page section h2{
   position:absolute;
   top:-112px;
