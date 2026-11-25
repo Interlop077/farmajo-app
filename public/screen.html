@@ -1211,6 +1211,12 @@ li{
   grid-column:4 / span 2;
 }
 
+/* Если всего 3 карточки — ставим их одной вертикальной колонкой по центру */
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:first-child:nth-last-child(3),
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:first-child:nth-last-child(3) ~ .dish-card{
+  grid-column:3 / span 2;
+}
+
 </style>
 </head>
 
