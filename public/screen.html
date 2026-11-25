@@ -1169,6 +1169,27 @@ li{
 #stage.theme-luxury #menu.screen3.luxury-paged .menu-page section.category-title-hidden ul{height:790px;}
 #stage.theme-luxury #menu.screen3.narrow.luxury-paged .menu-page section.category-title-hidden ul{height:auto;}
 
+/* ФИКСИРОВАННАЯ ОБЛАСТЬ НАЗВАНИЯ: одинаковая сетка карточек при показе и скрытии */
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section h2{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+  height:58px;
+  margin:0 0 18px;
+  overflow:hidden;
+  opacity:1;
+}
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section.category-title-hidden h2{
+  visibility:hidden;
+}
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul,
+#stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section.category-title-hidden ul{
+  box-sizing:border-box;
+  height:720px;
+  grid-template-rows:repeat(3,minmax(0,1fr));
+}
+
 /* При ровно 7 карточках: последняя занимает центральную колонку нижнего ряда */
 #stage.theme-luxury #menu.screen3.luxury-paged:not(.narrow) .menu-page section ul > .dish-card:nth-child(7):last-child{
   grid-column:2;
