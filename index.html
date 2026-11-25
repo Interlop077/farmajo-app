@@ -324,6 +324,15 @@ body.section-catalog .catalog-section{grid-column:2}
 @media(max-width:900px){body.section-catalog .layout{grid-template-columns:190px minmax(0,1fr)}.catalog-layout{grid-template-columns:1fr}.category-panel{order:0}.dish-panel{order:1}}
 @media(max-width:620px){body.section-catalog .layout{display:block}.catalog-section{padding:18px 10px 110px}.catalog-heading{align-items:flex-start;flex-direction:column}.catalog-heading h1{font-size:21px}.catalog-heading>.btn{width:100%}.catalog-layout{gap:12px}.glass-panel{padding:13px;border-radius:17px}.dish-panel-head{align-items:flex-start;flex-direction:column}.dish-panel-head>.btn{width:100%}.catalog-dish{grid-template-columns:52px minmax(0,1fr);gap:9px}.catalog-dish-thumb{width:52px;height:52px}.catalog-dish-price{grid-column:2;grid-row:2}.catalog-dish-actions{grid-column:1/-1;justify-content:flex-end;margin:0}.editor-grid{grid-template-columns:1fr 1fr}.editor-grid label:first-child,.editor-grid .wide{grid-column:1/-1}}
 
+
+/* Dish photo upload */
+.editor-grid input[type=file]{padding:9px;background:rgba(255,255,255,.045);border:1px dashed rgba(255,255,255,.25);border-radius:10px;color:var(--text)}
+.upload-help{color:var(--muted);font-weight:400;font-size:11px;line-height:1.45}
+.dish-image-preview{width:100%;max-width:280px;aspect-ratio:16/9;border:1px dashed rgba(255,255,255,.22);border-radius:12px;display:grid;place-items:center;overflow:hidden;color:var(--muted);font-size:12px;background:rgba(255,255,255,.035);margin-top:8px}
+.dish-image-preview img{width:100%;height:100%;object-fit:cover}
+#removeDishImageBtn{margin-top:8px;padding:7px 10px;font-size:11px}
+@media(max-width:620px){.dish-image-preview{max-width:100%}}
+
 </style>
 </head>
 <body>
@@ -355,7 +364,7 @@ body.section-catalog .catalog-section{grid-column:2}
           <label>Название блюда<input id="dishNameInput" type="text" placeholder="Например, Бургер фирменный"></label>
           <label>Цена<input id="dishPriceInput" type="text" placeholder="145"></label>
           <label>Валюта<select id="dishCurrencyInput"><option value="MDL">MDL — лей</option><option value="RUB">RUB — рубль</option><option value="EUR">EUR — евро</option><option value="USD">USD — доллар</option></select></label>
-          <label>Фото (ссылка)<input id="dishImageInput" type="url" placeholder="https://..."></label>
+          <label>Фото по ссылке<input id="dishImageInput" type="url" placeholder="https://..."></label><label class="wide">Или загрузите фото с устройства<input id="dishFileInput" type="file" accept="image/*"><small class="upload-help">Поддерживаются JPG, PNG и WebP. Фото автоматически уменьшается для экономии места.</small><div id="dishImagePreview" class="dish-image-preview"><span>Предпросмотр фотографии</span></div><button class="btn" id="removeDishImageBtn" type="button">Убрать фото</button></label>
           <label class="wide">Описание<textarea id="dishDescriptionInput" rows="3" placeholder="Краткое описание блюда и состав"></textarea></label>
         </div>
         <div class="editor-actions"><button class="btn" id="cancelDishBtn" type="button">Отмена</button><button class="btn primary" id="saveDishBtn" type="button">Сохранить блюдо</button></div>
@@ -398,6 +407,7 @@ const initialCatalog=[
 ];
 let catalog=(()=>{try{const saved=localStorage.getItem("menu-builder-catalog");if(saved){const parsed=JSON.parse(saved);if(Array.isArray(parsed))return parsed;}}catch(error){}return initialCatalog.map(c=>({...c,dishes:c.dishes.map(d=>({...d}))}));})();
 let activeCategoryId=catalog[0].id,editingDishId=null;
+let selectedDishImage="";
 const catalogList=$("#categoryList"),catalogDishes=$("#catalogDishList"),dishEditor=$("#dishEditor");
 function renderCatalog(){
  try{localStorage.setItem("menu-builder-catalog",JSON.stringify(catalog));}catch(error){}
@@ -410,17 +420,24 @@ function renderCatalog(){
  catalogDishes.innerHTML=active&&active.dishes.length?active.dishes.map(d=>'<article class="catalog-dish"><div class="catalog-dish-thumb">'+(d.image?'<img src="'+escapeCatalog(d.image)+'" alt="">':(d.emoji||"🍽️"))+'</div><div><div class="catalog-dish-name">'+escapeCatalog(d.name)+'</div><div class="catalog-dish-desc">'+escapeCatalog(d.description||"Без описания")+'</div></div><div class="catalog-dish-price">'+escapeCatalog(d.price||"—")+" "+escapeCatalog(d.currency||"MDL")+'</div><div class="catalog-dish-actions"><button class="btn" data-edit-dish="'+d.id+'" type="button">Изменить</button><button class="btn" data-delete-dish="'+d.id+'" type="button">Удалить</button></div></article>').join(""):'<div class="catalog-empty">В этой категории пока нет блюд.<br>Нажмите «Добавить блюдо», чтобы создать первую позицию.</div>';
 }
 function escapeCatalog(value){return String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));}
+
+function renderDishImagePreview(){const box=$("#dishImagePreview");if(!box)return;box.innerHTML=selectedDishImage?'<img src="'+escapeCatalog(selectedDishImage)+'" alt="Предпросмотр фото блюда">':'<span>Предпросмотр фотографии</span>';}
+function compressDishImage(file){return new Promise((resolve,reject)=>{if(!file.type.startsWith("image/")){reject(new Error("Выберите файл изображения."));return;}const reader=new FileReader();reader.onerror=()=>reject(new Error("Не удалось прочитать файл."));reader.onload=()=>{const img=new Image();img.onerror=()=>reject(new Error("Файл изображения повреждён или не поддерживается."));img.onload=()=>{const max=1100,scale=Math.min(1,max/Math.max(img.width,img.height)),canvas=document.createElement("canvas");canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);const ctx=canvas.getContext("2d");ctx.drawImage(img,0,0,canvas.width,canvas.height);resolve(canvas.toDataURL("image/jpeg",.78));};img.src=reader.result;};reader.readAsDataURL(file);});}
+$("#dishFileInput").addEventListener("change",async e=>{const file=e.target.files?.[0];if(!file)return;if(file.size>12*1024*1024){alert("Файл слишком большой. Выберите фото до 12 МБ.");e.target.value="";return;}try{selectedDishImage=await compressDishImage(file);$("#dishImageInput").value="";renderDishImagePreview();}catch(error){alert(error.message||"Не удалось загрузить фото.");e.target.value="";}});
+$("#dishImageInput").addEventListener("input",()=>{if($("#dishImageInput").value.trim()){selectedDishImage="";$("#dishFileInput").value="";}renderDishImagePreview();});
+$("#removeDishImageBtn").addEventListener("click",()=>{selectedDishImage="";$("#dishImageInput").value="";$("#dishFileInput").value="";renderDishImagePreview();});
+
 function openDishEditor(dish=null){
  if(!catalog.find(c=>c.id===activeCategoryId))return;
  editingDishId=dish?.id||null;$("#dishEditorTitle").textContent=dish?"Редактировать блюдо":"Новое блюдо";
- $("#dishNameInput").value=dish?.name||"";$("#dishPriceInput").value=dish?.price||"";$("#dishCurrencyInput").value=dish?.currency||"MDL";$("#dishImageInput").value=dish?.image||"";$("#dishDescriptionInput").value=dish?.description||"";
+ $("#dishNameInput").value=dish?.name||"";$("#dishPriceInput").value=dish?.price||"";$("#dishCurrencyInput").value=dish?.currency||"MDL";$("#dishImageInput").value=dish?.image?.startsWith("data:")?"":(dish?.image||"");selectedDishImage=dish?.image||"";$("#dishFileInput").value="";renderDishImagePreview();$("#dishDescriptionInput").value=dish?.description||"";
  dishEditor.hidden=false;$("#dishNameInput").focus();dishEditor.scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 function closeDishEditor(){dishEditor.hidden=true;editingDishId=null;}
 $("#addCategoryBtn").addEventListener("click",()=>{const name=prompt("Название новой категории:");if(!name||!name.trim())return;const id="cat-"+Date.now();catalog.push({id,name:name.trim(),dishes:[]});activeCategoryId=id;renderCatalog();});
 $("#addDishBtn").addEventListener("click",()=>openDishEditor());
 $("#closeDishEditor").addEventListener("click",closeDishEditor);$("#cancelDishBtn").addEventListener("click",closeDishEditor);
-$("#saveDishBtn").addEventListener("click",()=>{const name=$("#dishNameInput").value.trim();if(!name){alert("Укажите название блюда.");$("#dishNameInput").focus();return;}const cat=catalog.find(c=>c.id===activeCategoryId);if(!cat)return;const record={id:editingDishId||"dish-"+Date.now(),name,price:$("#dishPriceInput").value.trim(),currency:$("#dishCurrencyInput").value,image:$("#dishImageInput").value.trim(),description:$("#dishDescriptionInput").value.trim(),emoji:"🍽️"};if(editingDishId){const index=cat.dishes.findIndex(d=>d.id===editingDishId);if(index>=0)cat.dishes[index]=record;}else cat.dishes.push(record);closeDishEditor();renderCatalog();});
+$("#saveDishBtn").addEventListener("click",()=>{const name=$("#dishNameInput").value.trim();if(!name){alert("Укажите название блюда.");$("#dishNameInput").focus();return;}const cat=catalog.find(c=>c.id===activeCategoryId);if(!cat)return;const record={id:editingDishId||"dish-"+Date.now(),name,price:$("#dishPriceInput").value.trim(),currency:$("#dishCurrencyInput").value,image:selectedDishImage||$("#dishImageInput").value.trim(),description:$("#dishDescriptionInput").value.trim(),emoji:"🍽️"};if(editingDishId){const index=cat.dishes.findIndex(d=>d.id===editingDishId);if(index>=0)cat.dishes[index]=record;}else cat.dishes.push(record);closeDishEditor();renderCatalog();});
 catalogList.addEventListener("click",e=>{const select=e.target.closest("[data-category]"),rename=e.target.closest("[data-rename-category]");if(select){activeCategoryId=select.dataset.category;closeDishEditor();renderCatalog();}if(rename){const cat=catalog.find(c=>c.id===rename.dataset.renameCategory);const name=prompt("Новое название категории:",cat?.name||"");if(name&&name.trim()){cat.name=name.trim();renderCatalog();}}});
 catalogDishes.addEventListener("click",e=>{const edit=e.target.closest("[data-edit-dish]"),del=e.target.closest("[data-delete-dish]");const cat=catalog.find(c=>c.id===activeCategoryId);if(edit){const dish=cat?.dishes.find(d=>d.id===edit.dataset.editDish);if(dish)openDishEditor(dish);}if(del&&cat){const dish=cat.dishes.find(d=>d.id===del.dataset.deleteDish);if(dish&&confirm('Удалить блюдо «'+dish.name+'»?')){cat.dishes=cat.dishes.filter(d=>d.id!==dish.id);renderCatalog();}}});
 renderCatalog();
