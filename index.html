@@ -159,6 +159,58 @@ body{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
   }
 }
 
+
+/* Final phone layout: bottom-pinned navigation and a finite-height glow background */
+@media screen and (max-width: 620px) {
+  html, body {
+    min-height: 100%;
+  }
+  body {
+    position: relative !important;
+    padding-bottom: calc(76px + env(safe-area-inset-bottom)) !important;
+    background: #080d18 !important;
+    isolation: isolate;
+  }
+  body::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: auto !important;
+    height: 560px !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+    background:
+      radial-gradient(ellipse at 12% 8%, rgba(78,125,190,.28), transparent 34%),
+      radial-gradient(ellipse at 88% 25%, rgba(133,94,190,.22), transparent 32%),
+      radial-gradient(ellipse at 48% 100%, rgba(44,143,160,.16), transparent 40%),
+      linear-gradient(125deg, rgba(255,255,255,.035), transparent 35%, rgba(255,255,255,.025) 70%, transparent);
+  }
+  nav.mobile-tabs {
+    display: flex !important;
+    position: fixed !important;
+    inset: auto 0 0 0 !important;
+    top: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: calc(64px + env(safe-area-inset-bottom)) !important;
+    min-height: 64px !important;
+    margin: 0 !important;
+    padding: 7px 12px calc(7px + env(safe-area-inset-bottom)) !important;
+    box-sizing: border-box !important;
+    transform: none !important;
+    border: 0 !important;
+    border-top: 1px solid rgba(255,255,255,.18) !important;
+    border-radius: 0 !important;
+    background: rgba(13,19,32,.92) !important;
+    z-index: 99999 !important;
+  }
+}
+
 </style>
 </head>
 <body>
